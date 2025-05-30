@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pensión Alimenticia - Inicio</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">💰 Pensión Alimenticia</h1>
+            <div class="nav-menu">
+                <a href="/" class="nav-link active">🏠 Inicio</a>
+                <a href="/calculadora.html" class="nav-link">🧮 Calculadora</a>
+                <a href="/pagos.html" class="nav-link">💳 Pagos</a>
+                <a href="/historial.html" class="nav-link">📊 Historial</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container">
+        <!-- Bienvenida -->
+        <div class="welcome-section">
+            <h1>¡Bienvenido a tu App de Pensión Alimenticia!</h1>
+            <p class="subtitle">Gestiona fácilmente tus pagos basados en UTM (3.51360 UTM)</p>
+        </div>
+
+        <!-- Tarjetas de acceso rápido -->
+        <div class="cards-grid">
+            <!-- Calculadora UTM -->
+            <div class="card card-calculator">
+                <div class="card-icon">🧮</div>
+                <h2>Calculadora UTM</h2>
+                <p>Calcula cuánto debes pagar este mes basado en el valor actual de la UTM.</p>
+                <a href="/calculadora.html" class="btn btn-primary">Calcular Ahora</a>
+            </div>
+
+            <!-- Registrar Pago -->
+            <div class="card card-payment">
+                <div class="card-icon">💳</div>
+                <h2>Registrar Pago</h2>
+                <p>Anota los pagos que has realizado para llevar un control exacto.</p>
+                <a href="/pagos.html" class="btn btn-success">Agregar Pago</a>
+            </div>
+
+            <!-- Ver Historial -->
+            <div class="card card-history">
+                <div class="card-icon">📊</div>
+                <h2>Ver Historial</h2>
+                <p>Consulta todos tus pagos anteriores y el estado de cada mes.</p>
+                <a href="/historial.html" class="btn btn-info">Ver Historial</a>
+            </div>
+        </div>
+
+        <!-- Resumen rápido -->
+        <div class="quick-summary">
+            <h2>📋 Resumen Rápido</h2>
+            <div class="summary-cards">
+                <div class="summary-item">
+                    <div class="summary-number" id="totalPagos">0</div>
+                    <div class="summary-label">Pagos Registrados</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="montoTotal">$0</div>
+                    <div class="summary-label">Total Pagado</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="ultimoPago">-</div>
+                    <div class="summary-label">Último Pago</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información importante -->
+        <div class="info-section">
+            <div class="info-card">
+                <h3>ℹ️ Información Importante</h3>
+                <ul>
+                    <li><strong>Monto base:</strong> 3.51360 UTM</li>
+                    <li><strong>Equivalencia inicial:</strong> $240.000 (cuando se fijó)</li>
+                    <li><strong>Actualización:</strong> El monto cambia según el valor UTM mensual</li>
+                    <li><strong>Consulta UTM:</strong> Valores oficiales en el sitio del SII</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <p>&copy; 2025 - App Pensión Alimenticia - Creado con ❤️</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/js/app.js"></script>
+    <script>
+        // Código específico para la página de inicio
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏠 Página de inicio cargada');
+            
+            // Cargar resumen rápido
+            cargarResumenRapido();
+        });
+
+        function cargarResumenRapido() {
+            // Por ahora mostramos datos de ejemplo
+            // Más adelante esto vendrá de la base de datos
+            
+            try {
+                // Simular datos (después los obtendremos de MongoDB)
+                const totalPagos = 3;
+                const montoTotal = 720000;
+                const ultimoPago = '15/05/2025';
+                
+                // Actualizar el DOM
+                document.getElementById('totalPagos').textContent = totalPagos;
+                document.getElementById('montoTotal').textContent = formatearPesos(montoTotal);
+                document.getElementById('ultimoPago').textContent = ultimoPago;
+                
+                console.log('✅ Resumen rápido cargado');
+            } catch (error) {
+                console.error('❌ Error cargando resumen:', error);
+            }
+        }
+
+        function formatearPesos(cantidad) {
+            return new Intl.NumberFormat('es-CL', {
+                style: 'currency',
+                currency: 'CLP',
+                minimumFractionDigits: 0
+            }).format(cantidad);
+        }
+    </script>
+</body>
+</html>

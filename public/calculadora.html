@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora UTM - Pensión Alimenticia</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">💰 Pensión Alimenticia</h1>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">🏠 Inicio</a>
+                <a href="/calculadora.html" class="nav-link active">🧮 Calculadora</a>
+                <a href="/pagos.html" class="nav-link">💳 Pagos</a>
+                <a href="/historial.html" class="nav-link">📊 Historial</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container">
+        <!-- Título de la página -->
+        <div class="welcome-section">
+            <h1>🧮 Calculadora de Pensión</h1>
+            <p class="subtitle">Calcula cuánto debes pagar basado en el valor UTM actual</p>
+        </div>
+
+        <!-- Formulario de cálculo -->
+        <div class="quick-summary">
+            <h2>💳 Calcular Monto</h2>
+            
+            <form id="formCalculadora">
+                <div class="form-group">
+                    <label for="mesCalculo">Mes a calcular:</label>
+                    <input type="month" id="mesCalculo" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="valorUTM">Valor UTM (en pesos):</label>
+                    <input type="number" id="valorUTM" class="form-control" placeholder="68310" required>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Calcular Pensión</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Resultado del cálculo -->
+        <div id="resultadoCalculo" class="info-section" style="display: none;">
+            <div class="info-card">
+                <h3>💰 Resultado del Cálculo</h3>
+                <div class="summary-cards">
+                    <div class="summary-item">
+                        <div class="summary-number" id="mesCalculado">-</div>
+                        <div class="summary-label">Mes</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number" id="utmUsada">$0</div>
+                        <div class="summary-label">Valor UTM</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number" id="montoCalculado">$0</div>
+                        <div class="summary-label">Monto a Pagar</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de ayuda -->
+        <div class="info-section">
+            <div class="info-card">
+                <h3>ℹ️ Información de Cálculo</h3>
+                <ul>
+                    <li><strong>Factor UTM:</strong> 3.51360 UTM (monto fijo establecido)</li>
+                    <li><strong>Fórmula:</strong> Valor UTM × 3.51360 = Monto a pagar</li>
+                    <li><strong>Valor UTM:</strong> Se actualiza mensualmente según el SII</li>
+                    <li><strong>Consulta oficial:</strong> <a href="https://www.sii.cl" target="_blank">www.sii.cl</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <p>&copy; 2025 - App Pensión Alimenticia - Creado con ❤️</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧮 Página calculadora cargada');
+            
+            // Establecer fecha actual
+            const fechaActual = new Date();
+            const mesActual = fechaActual.toISOString().slice(0, 7);
+            document.getElementById('mesCalculo').value = mesActual;
+            
+            // Establecer valor UTM por defecto
+            document.getElementById('valorUTM').value = 68310;
+            
+            // Manejar el formulario
+            document.getElementById('formCalculadora').addEventListener('submit', function(e) {
+                e.preventDefault();
+                calcularPension();
+            });
+        });
+
+        function calcularPension() {
+            try {
+                const mes = document.getElementById('mesCalculo').value;
+                const valorUTM = parseFloat(document.getElementById('valorUTM').value);
+                
+                if (!mes || !valorUTM || valorUTM <= 0) {
+                    alert('Por favor completa todos los campos con valores válidos');
+                    return;
+                }
+                
+                // Calcular monto
+                const factorUTM = 3.51360;
+                const montoCalculado = Math.round(valorUTM * factorUTM);
+                
+                // Mostrar resultado
+                document.getElementById('mesCalculado').textContent = formatearMes(mes);
+                document.getElementById('utmUsada').textContent = formatearPesos(valorUTM);
+                document.getElementById('montoCalculado').textContent = formatearPesos(montoCalculado);
+                
+                // Mostrar la sección de resultado
+                document.getElementById('resultadoCalculo').style.display = 'block';
+                
+                console.log(`✅ Cálculo realizado: ${montoCalculado} pesos para ${mes}`);
+                
+            } catch (error) {
+                console.error('❌ Error en cálculo:', error);
+                alert('Error al realizar el cálculo');
+            }
+        }
+
+        function formatearPesos(cantidad) {
+            return new Intl.NumberFormat('es-CL', {
+                style: 'currency',
+                currency: 'CLP',
+                minimumFractionDigits: 0
+            }).format(cantidad);
+        }
+
+        function formatearMes(mesAno) {
+            const [ano, mes] = mesAno.split('-');
+            const fecha = new Date(ano, mes - 1);
+            return fecha.toLocaleDateString('es-CL', { 
+                year: 'numeric', 
+                month: 'long' 
+            });
+        }
+    </script>
+</body>
+</html>

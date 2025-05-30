@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Pagos - Pensión Alimenticia</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">💰 Pensión Alimenticia</h1>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">🏠 Inicio</a>
+                <a href="/calculadora.html" class="nav-link">🧮 Calculadora</a>
+                <a href="/pagos.html" class="nav-link active">💳 Pagos</a>
+                <a href="/historial.html" class="nav-link">📊 Historial</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container">
+        <!-- Título de la página -->
+        <div class="welcome-section">
+            <h1>💳 Registrar Nuevo Pago</h1>
+            <p class="subtitle">Anota los pagos realizados para llevar un control exacto</p>
+        </div>
+
+        <!-- Formulario de registro -->
+        <div class="quick-summary">
+            <h2>📝 Datos del Pago</h2>
+            
+            <form id="formPago">
+                <div class="form-group">
+                    <label for="fechaPago">Fecha del pago:</label>
+                    <input type="date" id="fechaPago" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="mesCorrespondiente">Mes correspondiente:</label>
+                    <input type="month" id="mesCorrespondiente" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="montoPago">Monto pagado:</label>
+                    <input type="number" id="montoPago" class="form-control" placeholder="240000" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="metodoPago">Método de pago:</label>
+                    <select id="metodoPago" class="form-control" required>
+                        <option value="">Seleccionar método</option>
+                        <option value="transferencia">Transferencia Bancaria</option>
+                        <option value="deposito">Depósito en Cuenta</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="cheque">Cheque</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="observaciones">Observaciones (opcional):</label>
+                    <textarea id="observaciones" class="form-control" rows="3" placeholder="Número de transferencia, detalles adicionales, etc."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">💾 Guardar Pago</button>
+                    <button type="button" class="btn btn-danger" onclick="limpiarFormulario()">🗑️ Limpiar</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Pagos recientes -->
+        <div class="info-section">
+            <div class="info-card">
+                <h3>📋 Últimos Pagos Registrados</h3>
+                <div id="listaPagosRecientes">
+                    <p>No hay pagos registrados aún.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guía rápida -->
+        <div class="info-section">
+            <div class="info-card">
+                <h3>💡 Guía Rápida</h3>
+                <ul>
+                    <li><strong>Fecha del pago:</strong> Cuándo realizaste el pago</li>
+                    <li><strong>Mes correspondiente:</strong> A qué mes de pensión corresponde</li>
+                    <li><strong>Monto:</strong> Cantidad exacta que pagaste</li>
+                    <li><strong>Método:</strong> Cómo realizaste el pago</li>
+                    <li><strong>Observaciones:</strong> Detalles como número de transferencia</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <p>&copy; 2025 - App Pensión Alimenticia - Creado con ❤️</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/js/app.js"></script>
+    <script>
+        let pagosLocales = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('💳 Página de pagos cargada');
+            
+            // Establecer fecha actual
+            const fechaActual = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaPago').value = fechaActual;
+            
+            // Establecer mes actual
+            const mesActual = new Date().toISOString().slice(0, 7);
+            document.getElementById('mesCorrespondiente').value = mesActual;
+            
+            // Cargar pagos existentes
+            cargarPagosLocales();
+            mostrarPagosRecientes();
+            
+            // Manejar el formulario
+            document.getElementById('formPago').addEventListener('submit', function(e) {
+                e.preventDefault();
+                registrarPago();
+            });
+        });
+
+        function registrarPago() {
+            try {
+                const fechaPago = document.getElementById('fechaPago').value;
+                const mesCorrespondiente = document.getElementById('mesCorrespondiente').value;
+                const montoPago = parseFloat(document.getElementById('montoPago').value);
+                const metodoPago = document.getElementById('metodoPago').value;
+                const observaciones = document.getElementById('observaciones').value;
+                
+                // Validar datos
+                if (!fechaPago || !mesCorrespondiente || !montoPago || !metodoPago) {
+                    alert('Por favor completa todos los campos obligatorios');
+                    return;
+                }
+                
+                if (montoPago <= 0) {
+                    alert('El monto debe ser mayor a 0');
+                    return;
+                }
+                
+                // Crear objeto del pago
+                const nuevoPago = {
+                    id: Date.now(), // ID único simple
+                    fecha: fechaPago,
+                    mesCorrespondiente: mesCorrespondiente,
+                    monto: montoPago,
+                    metodo: metodoPago,
+                    observaciones: observaciones,
+                    fechaRegistro: new Date().toISOString()
+                };
+                
+                // Agregar a la lista
+                pagosLocales.push(nuevoPago);
+                
+                // Guardar en localStorage
+                guardarPagosLocales();
+                
+                // Actualizar vista
+                mostrarPagosRecientes();
+                
+                // Limpiar formulario
+                limpiarFormulario();
+                
+                // Mostrar confirmación
+                alert('✅ Pago registrado correctamente');
+                
+                console.log('✅ Pago registrado:', nuevoPago);
+                
+            } catch (error) {
+                console.error('❌ Error registrando pago:', error);
+                alert('Error al registrar el pago');
+            }
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('formPago').reset();
+            
+            // Restablecer valores por defecto
+            const fechaActual = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaPago').value = fechaActual;
+            
+            const mesActual = new Date().toISOString().slice(0, 7);
+            document.getElementById('mesCorrespondiente').value = mesActual;
+        }
+
+        function cargarPagosLocales() {
+            try {
+                const pagosGuardados = localStorage.getItem('pension_pagos');
+                if (pagosGuardados) {
+                    pagosLocales = JSON.parse(pagosGuardados);
+                }
+            } catch (error) {
+                console.warn('No se pudieron cargar los pagos:', error);
+                pagosLocales = [];
+            }
+        }
+
+        function guardarPagosLocales() {
+            try {
+                localStorage.setItem('pension_pagos', JSON.stringify(pagosLocales));
+            } catch (error) {
+                console.warn('No se pudieron guardar los pagos:', error);
+            }
+        }
+
+        function mostrarPagosRecientes() {
+            const contenedor = document.getElementById('listaPagosRecientes');
+            
+            if (pagosLocales.length === 0) {
+                contenedor.innerHTML = '<p>No hay pagos registrados aún.</p>';
+                return;
+            }
+            
+            // Mostrar últimos 5 pagos
+            const pagosRecientes = pagosLocales
+                .sort((a, b) => new Date(b.fechaRegistro) - new Date(a.fechaRegistro))
+                .slice(0, 5);
+            
+            let html = '<div class="summary-cards">';
+            
+            pagosRecientes.forEach(pago => {
+                html += `
+                    <div class="summary-item">
+                        <div class="summary-number">${formatearPesos(pago.monto)}</div>
+                        <div class="summary-label">${formatearFecha(pago.fecha)}</div>
+                        <small>Para: ${formatearMes(pago.mesCorrespondiente)}</small>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            contenedor.innerHTML = html;
+        }
+
+        function formatearPesos(cantidad) {
+            return new Intl.NumberFormat('es-CL', {
+                style: 'currency',
+                currency: 'CLP',
+                minimumFractionDigits: 0
+            }).format(cantidad);
+        }
+
+        function formatearFecha(fecha) {
+            return new Date(fecha).toLocaleDateString('es-CL');
+        }
+
+        function formatearMes(mesAno) {
+            const [ano, mes] = mesAno.split('-');
+            const fecha = new Date(ano, mes - 1);
+            return fecha.toLocaleDateString('es-CL', { 
+                year: 'numeric', 
+                month: 'long' 
+            });
+        }
+    </script>
+</body>
+</html>
