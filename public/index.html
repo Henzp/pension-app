@@ -4,9 +4,147 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pensión Alimenticia - Inicio</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="App para gestionar pagos de pensión alimenticia basados en UTM">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Pensión UTM">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Favicon e iconos -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    
+    <!-- CSS -->
     <link rel="stylesheet" href="/css/styles.css">
+    
+    <!-- PWA Install prompt styling -->
+    <style>
+        .install-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+        
+        .install-banner.show {
+            display: block;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .install-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        
+        .install-text {
+            flex: 1;
+        }
+        
+        .install-text h4 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+        }
+        
+        .install-text p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .install-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .install-btn {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .install-btn.primary {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .install-btn:hover {
+            background: white;
+        }
+        
+        .install-btn.primary:hover {
+            background: #2ecc71;
+        }
+        
+        .close-btn {
+            background: transparent;
+            color: white;
+            padding: 5px 10px;
+        }
+        
+        .mobile-instructions {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .mobile-instructions.android {
+            display: none;
+        }
+        
+        .mobile-instructions.ios {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .install-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Banner de instalación PWA -->
+    <div id="installBanner" class="install-banner">
+        <div class="install-content">
+            <div class="install-text">
+                <h4>📱 ¡Instala la App!</h4>
+                <p>Úsala sin conexión y accede más rápido</p>
+            </div>
+            <div class="install-buttons">
+                <button id="installBtn" class="install-btn primary">Instalar</button>
+                <button id="closeBanner" class="install-btn close-btn">✕</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Navegación -->
     <nav class="navbar">
         <div class="nav-container">
@@ -26,6 +164,31 @@
         <div class="welcome-section">
             <h1>¡Bienvenido a tu App de Pensión Alimenticia!</h1>
             <p class="subtitle">Gestiona fácilmente tus pagos basados en UTM (3.51360 UTM)</p>
+            
+            <!-- Estado de la app -->
+            <div id="appStatus" style="margin-top: 20px;">
+                <small id="statusText">🔄 Verificando estado de la app...</small>
+            </div>
+        </div>
+
+        <!-- Instrucciones de instalación móvil -->
+        <div id="mobileInstructions" class="mobile-instructions" style="display: none;">
+            <h3>📱 Cómo instalar en tu dispositivo</h3>
+            <div id="androidInstructions" class="android">
+                <p><strong>En Android (Chrome):</strong></p>
+                <p>1. Toca el menú (⋮) arriba a la derecha</p>
+                <p>2. Selecciona "Instalar app" o "Agregar a pantalla de inicio"</p>
+                <p>3. Confirma la instalación</p>
+            </div>
+            <div id="iosInstructions" class="ios">
+                <p><strong>En iPhone (Safari):</strong></p>
+                <p>1. Toca el botón de compartir (📤) abajo</p>
+                <p>2. Selecciona "Añadir a pantalla de inicio"</p>
+                <p>3. Confirma el nombre y toca "Añadir"</p>
+            </div>
+            <button onclick="mostrarInstruccionesEspecificas()" class="btn btn-info" style="margin-top: 10px;">
+                📋 Ver instrucciones específicas
+            </button>
         </div>
 
         <!-- Tarjetas de acceso rápido -->
@@ -82,7 +245,8 @@
                     <li><strong>Monto base:</strong> 3.51360 UTM</li>
                     <li><strong>Equivalencia inicial:</strong> $240.000 (cuando se fijó)</li>
                     <li><strong>Actualización:</strong> El monto cambia según el valor UTM mensual</li>
-                    <li><strong>Consulta UTM:</strong> Valores oficiales en el sitio del SII</li>
+                    <li><strong>Consulta UTM:</strong> Valores oficiales desde API confiable</li>
+                    <li><strong>Offline:</strong> La app funciona sin internet</li>
                 </ul>
             </div>
         </div>
@@ -90,29 +254,209 @@
 
     <!-- Pie de página -->
     <footer class="footer">
-        <p>&copy; 2025 - App Pensión Alimenticia - Creado con ❤️</p>
+        <p>&copy; 2025 - App Pensión Alimenticia - Creado con ❤️ | PWA Lista</p>
     </footer>
 
     <!-- JavaScript -->
     <script src="/js/app.js"></script>
     <script>
-        // Código específico para la página de inicio
+        // Variables para PWA
+        let deferredPrompt;
+        let isIOS = false;
+        let isAndroid = false;
+        
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🏠 Página de inicio cargada');
+            console.log('🏠 Página de inicio con instalación móvil mejorada');
+            
+            // Detectar dispositivo
+            detectarDispositivo();
+            
+            // Registrar Service Worker
+            registrarServiceWorker();
+            
+            // Configurar prompt de instalación
+            configurarInstallPrompt();
             
             // Cargar resumen rápido
             cargarResumenRapido();
+            
+            // Mostrar estado de la app
+            mostrarEstadoApp();
+            
+            // Mostrar banner de instalación después de 3 segundos
+            setTimeout(verificarYMostrarBannerInstalacion, 3000);
         });
 
-        function cargarResumenRapido() {
-            // Por ahora mostramos datos de ejemplo
-            // Más adelante esto vendrá de la base de datos
+        function detectarDispositivo() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            isIOS = /iphone|ipad|ipod/.test(userAgent);
+            isAndroid = /android/.test(userAgent);
             
+            console.log(`📱 Dispositivo detectado: iOS=${isIOS}, Android=${isAndroid}`);
+        }
+
+        function verificarYMostrarBannerInstalacion() {
+            // No mostrar si ya está instalado
+            if (window.matchMedia('(display-mode: standalone)').matches || 
+                window.navigator.standalone === true) {
+                console.log('📱 App ya instalada, no mostrar banner');
+                return;
+            }
+            
+            // No mostrar si es desktop
+            if (!isIOS && !isAndroid && window.innerWidth > 768) {
+                console.log('💻 Dispositivo desktop detectado');
+                return;
+            }
+            
+            // Mostrar banner de instalación
+            mostrarBannerInstalacion();
+        }
+
+        function mostrarBannerInstalacion() {
+            const banner = document.getElementById('installBanner');
+            const instructions = document.getElementById('mobileInstructions');
+            
+            banner.classList.add('show');
+            instructions.style.display = 'block';
+            
+            console.log('📱 Banner de instalación mostrado');
+        }
+
+        function ocultarBannerInstalacion() {
+            const banner = document.getElementById('installBanner');
+            banner.classList.remove('show');
+        }
+
+        function mostrarInstruccionesEspecificas() {
+            const androidInst = document.getElementById('androidInstructions');
+            const iosInst = document.getElementById('iosInstructions');
+            
+            if (isAndroid) {
+                androidInst.style.display = 'block';
+                iosInst.style.display = 'none';
+            } else if (isIOS) {
+                androidInst.style.display = 'none';
+                iosInst.style.display = 'block';
+            } else {
+                androidInst.style.display = 'block';
+                iosInst.style.display = 'block';
+            }
+        }
+
+        // Registrar Service Worker
+        async function registrarServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('✅ Service Worker registrado:', registration);
+                    
+                    registration.addEventListener('updatefound', () => {
+                        console.log('🔄 Nueva versión disponible');
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                mostrarNotificacionActualizacion();
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.log('❌ Error registrando Service Worker:', error);
+                }
+            }
+        }
+
+        // Configurar prompt de instalación
+        function configurarInstallPrompt() {
+            // Listener para el prompt de instalación
+            window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('📱 Prompt de instalación disponible');
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Mostrar banner personalizado
+                mostrarBannerInstalacion();
+            });
+
+            // Listeners para botones
+            document.getElementById('installBtn').addEventListener('click', instalarApp);
+            document.getElementById('closeBanner').addEventListener('click', ocultarBannerInstalacion);
+            
+            // Listener para cuando se instala
+            window.addEventListener('appinstalled', () => {
+                console.log('✅ App instalada correctamente');
+                ocultarBannerInstalacion();
+                mostrarAlerta('✅ ¡App instalada correctamente en tu dispositivo!', 'success');
+                deferredPrompt = null;
+            });
+        }
+
+        async function instalarApp() {
+            if (deferredPrompt) {
+                // PWA con prompt disponible
+                console.log('📱 Mostrando prompt de instalación');
+                deferredPrompt.prompt();
+                const choiceResult = await deferredPrompt.userChoice;
+                
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('✅ Usuario aceptó instalar la app');
+                } else {
+                    console.log('❌ Usuario rechazó instalar la app');
+                }
+                
+                deferredPrompt = null;
+                ocultarBannerInstalacion();
+            } else {
+                // Dispositivo iOS o sin prompt - mostrar instrucciones
+                console.log('📱 Mostrando instrucciones manuales');
+                mostrarInstruccionesEspecificas();
+                
+                if (isIOS) {
+                    alert('📱 En Safari: Toca el botón Compartir (📤) y selecciona "Añadir a pantalla de inicio"');
+                } else {
+                    alert('📱 En Chrome: Toca el menú (⋮) y selecciona "Instalar app" o "Agregar a pantalla de inicio"');
+                }
+            }
+        }
+
+        function mostrarEstadoApp() {
+            const statusText = document.getElementById('statusText');
+            
+            if ('serviceWorker' in navigator) {
+                if (navigator.onLine) {
+                    statusText.innerHTML = '🟢 App funcionando - Conectado a internet';
+                } else {
+                    statusText.innerHTML = '🟡 App funcionando - Modo offline';
+                }
+            } else {
+                statusText.innerHTML = '⚪ App funcionando - Navegador básico';
+            }
+            
+            // Verificar si está instalada como PWA
+            if (window.matchMedia('(display-mode: standalone)').matches || 
+                window.navigator.standalone === true) {
+                statusText.innerHTML += ' | 📱 Instalada como app';
+            }
+        }
+
+        function cargarResumenRapido() {
             try {
-                // Simular datos (después los obtendremos de MongoDB)
-                const totalPagos = 3;
-                const montoTotal = 720000;
-                const ultimoPago = '15/05/2025';
+                // Obtener datos del localStorage si existen
+                const pagosGuardados = localStorage.getItem('pension_pagos');
+                let totalPagos = 0;
+                let montoTotal = 0;
+                let ultimoPago = '-';
+                
+                if (pagosGuardados) {
+                    const pagos = JSON.parse(pagosGuardados);
+                    totalPagos = pagos.length;
+                    montoTotal = pagos.reduce((total, pago) => total + (pago.monto || 0), 0);
+                    
+                    if (pagos.length > 0) {
+                        const pagoReciente = pagos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
+                        ultimoPago = new Date(pagoReciente.fecha).toLocaleDateString('es-CL');
+                    }
+                }
                 
                 // Actualizar el DOM
                 document.getElementById('totalPagos').textContent = totalPagos;
@@ -132,6 +476,43 @@
                 minimumFractionDigits: 0
             }).format(cantidad);
         }
+
+        function mostrarNotificacionActualizacion() {
+            if (confirm('🔄 Hay una nueva versión disponible. ¿Quieres actualizar?')) {
+                window.location.reload();
+            }
+        }
+
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            const alertaExistente = document.querySelector('.alert');
+            if (alertaExistente) {
+                alertaExistente.remove();
+            }
+            
+            const alerta = document.createElement('div');
+            alerta.className = `alert alert-${tipo}`;
+            alerta.textContent = mensaje;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(alerta, container.firstChild);
+            
+            setTimeout(() => {
+                if (alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 5000);
+        }
+
+        // Listeners para estado de conexión
+        window.addEventListener('online', () => {
+            mostrarEstadoApp();
+            mostrarAlerta('🟢 Conexión restaurada', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            mostrarEstadoApp();
+            mostrarAlerta('🟡 Sin conexión - Funcionando offline', 'info');
+        });
     </script>
 </body>
 </html>

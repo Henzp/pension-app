@@ -25,7 +25,22 @@
         <!-- Título de la página -->
         <div class="welcome-section">
             <h1>🧮 Calculadora de Pensión</h1>
-            <p class="subtitle">Calcula cuánto debes pagar basado en el valor UTM actual</p>
+            <p class="subtitle">Calcula cuánto debes pagar basado en el valor UTM oficial del SII</p>
+        </div>
+
+        <!-- Estado de la API -->
+        <div class="info-section">
+            <div class="info-card">
+                <h3>🌐 Estado de Conexión</h3>
+                <div id="estadoAPI" class="text-center">
+                    <p>🔄 Verificando conexión con API...</p>
+                </div>
+                <div class="text-center" style="margin-top: 1rem;">
+                    <button type="button" class="btn btn-info" onclick="actualizarUTMDesdeAPI()">
+                        🔄 Actualizar UTM desde API
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Formulario de cálculo -->
@@ -36,15 +51,25 @@
                 <div class="form-group">
                     <label for="mesCalculo">Mes a calcular:</label>
                     <input type="month" id="mesCalculo" class="form-control" required>
+                    <small style="color: #666; font-size: 0.9rem;">
+                        <strong>Mes seleccionado:</strong> <span id="mesSeleccionado">-</span>
+                    </small>
                 </div>
 
                 <div class="form-group">
                     <label for="valorUTM">Valor UTM (en pesos):</label>
-                    <input type="number" id="valorUTM" class="form-control" placeholder="68310" required>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="valorUTM" class="form-control" placeholder="68310" required>
+                        <button type="button" class="btn btn-primary" onclick="obtenerUTMOficialDelMes()" 
+                                style="white-space: nowrap;">
+                            📡 Obtener del Mes
+                        </button>
+                    </div>
+                    <small id="fechaUTM" style="color: #666; font-size: 0.9rem;"></small>
                 </div>
 
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Calcular Pensión</button>
+                    <button type="submit" class="btn btn-success">💰 Calcular Pensión</button>
                 </div>
             </form>
         </div>
@@ -67,6 +92,31 @@
                         <div class="summary-label">Monto a Pagar</div>
                     </div>
                 </div>
+                <div class="text-center" style="margin-top: 1rem;">
+                    <p id="fuenteUTM" style="font-size: 0.9rem; color: #666;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debug del selector -->
+        <div class="info-section">
+            <div class="info-card">
+                <h3>🔍 Debug del Mes Seleccionado</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <p><strong>Mes en selector:</strong> <span id="debugMesRaw">-</span></p>
+                        <p><strong>Mes formateado:</strong> <span id="debugMesFormateado">-</span></p>
+                    </div>
+                    <div>
+                        <p><strong>Valor UTM actual:</strong> <span id="debugUTMInput">-</span></p>
+                        <p><strong>Fuente del valor:</strong> <span id="debugFuente">-</span></p>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button type="button" class="btn btn-info" onclick="actualizarDebugInfo()">
+                        🧪 Actualizar Debug
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -77,8 +127,9 @@
                 <ul>
                     <li><strong>Factor UTM:</strong> 3.51360 UTM (monto fijo establecido)</li>
                     <li><strong>Fórmula:</strong> Valor UTM × 3.51360 = Monto a pagar</li>
-                    <li><strong>Valor UTM:</strong> Se actualiza mensualmente según el SII</li>
-                    <li><strong>Consulta oficial:</strong> <a href="https://www.sii.cl" target="_blank">www.sii.cl</a></li>
+                    <li><strong>Mes específico:</strong> La app obtiene el valor UTM del mes seleccionado</li>
+                    <li><strong>Fuente oficial:</strong> <a href="https://www.sii.cl" target="_blank">SII Chile</a></li>
+                    <li><strong>API utilizada:</strong> <a href="https://mindicador.cl" target="_blank">mindicador.cl</a></li>
                 </ul>
             </div>
         </div>
@@ -91,17 +142,38 @@
 
     <!-- JavaScript -->
     <script src="/js/app.js"></script>
+    <script src="/js/utm-api.js"></script>
     <script>
+        let apiConectada = false;
+
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🧮 Página calculadora cargada');
+            console.log('🧮 Calculadora con mes específico cargada');
             
             // Establecer fecha actual
             const fechaActual = new Date();
             const mesActual = fechaActual.toISOString().slice(0, 7);
-            document.getElementById('mesCalculo').value = mesActual;
             
-            // Establecer valor UTM por defecto
-            document.getElementById('valorUTM').value = 68310;
+            const inputMes = document.getElementById('mesCalculo');
+            inputMes.value = mesActual;
+            
+            // Actualizar información del mes seleccionado
+            actualizarMesSeleccionado();
+            actualizarDebugInfo();
+            
+            // Listener para cambios en el selector de mes
+            inputMes.addEventListener('change', function() {
+                console.log('📅 Mes cambiado a:', this.value);
+                actualizarMesSeleccionado();
+                actualizarDebugInfo();
+                // Limpiar el valor UTM cuando cambie el mes
+                document.getElementById('fechaUTM').textContent = 'Selecciona "Obtener del Mes" para el nuevo mes';
+            });
+            
+            // Verificar conexión con API al cargar
+            verificarYMostrarEstadoAPI();
+            
+            // Intentar cargar UTM del mes actual
+            obtenerUTMOficialDelMes();
             
             // Manejar el formulario
             document.getElementById('formCalculadora').addEventListener('submit', function(e) {
@@ -110,13 +182,171 @@
             });
         });
 
+        function actualizarMesSeleccionado() {
+            const mesInput = document.getElementById('mesCalculo');
+            const mesValue = mesInput.value;
+            
+            if (mesValue) {
+                const mesFormateado = formatearMes(mesValue);
+                document.getElementById('mesSeleccionado').textContent = mesFormateado;
+                console.log(`📅 Mes seleccionado actualizado: ${mesFormateado} (${mesValue})`);
+            }
+        }
+
+        function actualizarDebugInfo() {
+            const mesInput = document.getElementById('mesCalculo');
+            const utmInput = document.getElementById('valorUTM');
+            const fuenteElement = document.getElementById('fechaUTM');
+            
+            const mesValue = mesInput.value;
+            const utmValue = utmInput.value;
+            const fuenteText = fuenteElement.textContent;
+            
+            document.getElementById('debugMesRaw').textContent = mesValue || 'No seleccionado';
+            document.getElementById('debugMesFormateado').textContent = mesValue ? formatearMes(mesValue) : 'No seleccionado';
+            document.getElementById('debugUTMInput').textContent = utmValue ? `$${parseInt(utmValue).toLocaleString('es-CL')}` : 'No ingresado';
+            document.getElementById('debugFuente').textContent = fuenteText || 'No disponible';
+            
+            console.log('🔍 Debug actualizado:', {
+                mesRaw: mesValue,
+                mesFormateado: mesValue ? formatearMes(mesValue) : null,
+                utm: utmValue,
+                fuente: fuenteText
+            });
+        }
+
+        async function verificarYMostrarEstadoAPI() {
+            const estadoDiv = document.getElementById('estadoAPI');
+            
+            try {
+                if (typeof UTMAPI !== 'undefined') {
+                    const utm = await UTMAPI.obtenerUTMActual();
+                    estadoDiv.innerHTML = `
+                        <p style="color: #27ae60;">✅ Conectado con API oficial</p>
+                        <small>UTM más reciente: $${utm.valor.toLocaleString('es-CL')}</small><br>
+                        <small>Fecha: ${formatearFecha(utm.fecha)}</small>
+                    `;
+                    apiConectada = true;
+                } else {
+                    throw new Error('UTMAPI no disponible');
+                }
+            } catch (error) {
+                estadoDiv.innerHTML = `
+                    <p style="color: #e74c3c;">❌ Sin conexión a API</p>
+                    <small>Usando valores por defecto</small>
+                `;
+                apiConectada = false;
+            }
+        }
+
+        async function obtenerUTMOficialDelMes() {
+            const btn = event?.target;
+            const textOriginal = btn?.textContent;
+            
+            try {
+                if (btn) {
+                    btn.textContent = '🔄 Obteniendo...';
+                    btn.disabled = true;
+                }
+                
+                // Obtener el mes seleccionado
+                const mesSeleccionado = document.getElementById('mesCalculo').value;
+                
+                if (!mesSeleccionado) {
+                    alert('❌ Por favor selecciona un mes primero');
+                    return;
+                }
+                
+                console.log(`📡 Obteniendo UTM para el mes: ${mesSeleccionado}`);
+                
+                if (typeof UTMAPI === 'undefined') {
+                    throw new Error('API UTM no disponible');
+                }
+                
+                // Intentar obtener UTM del mes específico
+                let utm;
+                let fuente;
+                
+                try {
+                    // Primero intentar obtener del mes específico
+                    utm = await UTMAPI.obtenerUTMPorMes(mesSeleccionado);
+                    fuente = `Valor oficial para ${formatearMes(mesSeleccionado)}`;
+                    console.log(`✅ UTM obtenida para ${mesSeleccionado}: $${utm}`);
+                } catch (error) {
+                    console.log(`⚠️ No se encontró UTM específica para ${mesSeleccionado}, usando valor más reciente`);
+                    // Si no hay para ese mes, usar el más reciente
+                    const utmActual = await UTMAPI.obtenerUTMActual();
+                    utm = utmActual.valor;
+                    fuente = `Valor más reciente disponible (${formatearFecha(utmActual.fecha)}) - No hay dato específico para ${formatearMes(mesSeleccionado)}`;
+                }
+                
+                // Actualizar el formulario
+                document.getElementById('valorUTM').value = Math.round(utm);
+                document.getElementById('fechaUTM').textContent = `✅ ${fuente}`;
+                
+                // Actualizar debug
+                actualizarDebugInfo();
+                
+                mostrarAlerta(`✅ UTM obtenida para ${formatearMes(mesSeleccionado)}: $${Math.round(utm).toLocaleString('es-CL')}`, 'success');
+                
+            } catch (error) {
+                console.error('❌ Error obteniendo UTM:', error);
+                mostrarAlerta('❌ Error obteniendo UTM oficial. Usa el valor manualmente.', 'danger');
+                document.getElementById('fechaUTM').textContent = 'Error obteniendo valor oficial - Ingresa manualmente';
+            } finally {
+                if (btn) {
+                    btn.textContent = textOriginal;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        async function actualizarUTMDesdeAPI() {
+            const btn = event.target;
+            const textOriginal = btn.textContent;
+            
+            try {
+                btn.textContent = '🔄 Actualizando...';
+                btn.disabled = true;
+                
+                if (typeof UTMAPI === 'undefined') {
+                    throw new Error('UTMAPI no disponible');
+                }
+                
+                const exito = await UTMAPI.actualizarValoresUTMAutomaticamente();
+                
+                if (exito) {
+                    await verificarYMostrarEstadoAPI();
+                    mostrarAlerta('✅ Base de datos UTM actualizada', 'success');
+                } else {
+                    mostrarAlerta('⚠️ No se pudieron actualizar todos los valores', 'danger');
+                }
+                
+            } catch (error) {
+                mostrarAlerta('❌ Error actualizando valores UTM', 'danger');
+            } finally {
+                btn.textContent = textOriginal;
+                btn.disabled = false;
+            }
+        }
+
         function calcularPension() {
             try {
-                const mes = document.getElementById('mesCalculo').value;
-                const valorUTM = parseFloat(document.getElementById('valorUTM').value);
+                // Obtener valores del formulario
+                const mesInput = document.getElementById('mesCalculo');
+                const valorUTMInput = document.getElementById('valorUTM');
                 
+                const mes = mesInput.value;
+                const valorUTM = parseFloat(valorUTMInput.value);
+                
+                console.log('🧮 Calculando pensión:');
+                console.log('   - Mes seleccionado:', mes);
+                console.log('   - Valor UTM:', valorUTM);
+                
+                // Validar datos
                 if (!mes || !valorUTM || valorUTM <= 0) {
-                    alert('Por favor completa todos los campos con valores válidos');
+                    alert('❌ Por favor completa todos los campos con valores válidos');
+                    console.error('Validación fallida:', {mes, valorUTM});
                     return;
                 }
                 
@@ -124,15 +354,27 @@
                 const factorUTM = 3.51360;
                 const montoCalculado = Math.round(valorUTM * factorUTM);
                 
+                console.log(`✅ Cálculo exitoso: ${montoCalculado} pesos para ${formatearMes(mes)}`);
+                
                 // Mostrar resultado
                 document.getElementById('mesCalculado').textContent = formatearMes(mes);
                 document.getElementById('utmUsada').textContent = formatearPesos(valorUTM);
                 document.getElementById('montoCalculado').textContent = formatearPesos(montoCalculado);
                 
+                // Mostrar fuente del valor
+                const fechaUTM = document.getElementById('fechaUTM').textContent;
+                document.getElementById('fuenteUTM').textContent = fechaUTM || 'Valor ingresado manualmente';
+                
                 // Mostrar la sección de resultado
                 document.getElementById('resultadoCalculo').style.display = 'block';
                 
-                console.log(`✅ Cálculo realizado: ${montoCalculado} pesos para ${mes}`);
+                // Scroll hacia el resultado
+                document.getElementById('resultadoCalculo').scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+                
+                // Actualizar debug
+                actualizarDebugInfo();
                 
             } catch (error) {
                 console.error('❌ Error en cálculo:', error);
@@ -149,12 +391,38 @@
         }
 
         function formatearMes(mesAno) {
+            if (!mesAno) return '-';
+            
             const [ano, mes] = mesAno.split('-');
             const fecha = new Date(ano, mes - 1);
             return fecha.toLocaleDateString('es-CL', { 
                 year: 'numeric', 
                 month: 'long' 
             });
+        }
+
+        function formatearFecha(fecha) {
+            return new Date(fecha).toLocaleDateString('es-CL');
+        }
+
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            const alertaExistente = document.querySelector('.alert');
+            if (alertaExistente) {
+                alertaExistente.remove();
+            }
+            
+            const alerta = document.createElement('div');
+            alerta.className = `alert alert-${tipo}`;
+            alerta.textContent = mensaje;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(alerta, container.firstChild);
+            
+            setTimeout(() => {
+                if (alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 5000);
         }
     </script>
 </body>
