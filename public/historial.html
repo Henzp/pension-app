@@ -5,125 +5,165 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial de Pagos - Pensión Alimenticia</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/mobile-nav.css">
 </head>
 <body>
-    <!-- Navegación -->
-    <nav class="navbar">
+    <!-- NUEVA NAVEGACIÓN MÓVIL -->
+    <nav class="main-nav">
         <div class="nav-container">
-            <h1 class="nav-title">💰 Pensión Alimenticia</h1>
-            <div class="nav-menu">
-                <a href="/" class="nav-link">🏠 Inicio</a>
-                <a href="/calculadora.html" class="nav-link">🧮 Calculadora</a>
-                <a href="/pagos.html" class="nav-link">💳 Pagos</a>
-                <a href="/historial.html" class="nav-link active">📊 Historial</a>
-            </div>
+            <a href="/" class="nav-brand">
+                Pensión UTM
+            </a>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link" id="nav-home">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/calculadora.html" class="nav-link" id="nav-calc">
+                        <span class="nav-icon">🧮</span>
+                        <span class="nav-text">Calcular</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/pagos.html" class="nav-link" id="nav-pagos">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Pagos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/historial.html" class="nav-link" id="nav-historial">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Historial</span>
+                    </a>
+                </li>
+            </ul>
         </div>
     </nav>
 
-    <!-- Contenido principal -->
-    <div class="container">
-        <!-- Título de la página -->
-        <div class="welcome-section">
-            <h1>📊 Historial de Pagos</h1>
-            <p class="subtitle">Consulta todos tus pagos registrados y su estado</p>
-        </div>
-
-        <!-- Resumen general -->
-        <div class="quick-summary">
-            <h2>📋 Resumen General</h2>
-            <div class="summary-cards">
-                <div class="summary-item">
-                    <div class="summary-number" id="totalPagosHistorial">0</div>
-                    <div class="summary-label">Total Pagos</div>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Título de la página -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    📊 Historial de Pagos
                 </div>
-                <div class="summary-item">
-                    <div class="summary-number" id="montoTotalHistorial">$0</div>
-                    <div class="summary-label">Monto Total</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number" id="promedioMensual">$0</div>
-                    <div class="summary-label">Promedio Mensual</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number" id="ultimoMesPagado">-</div>
-                    <div class="summary-label">Último Mes</div>
+                <div class="card-body">
+                    <p>Consulta todos tus pagos registrados y su estado</p>
                 </div>
             </div>
-        </div>
 
-        <!-- Filtros -->
-        <div class="info-section">
-            <div class="info-card">
-                <h3>🔍 Filtros</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                    <div class="form-group">
-                        <label for="filtroAno">Año:</label>
-                        <select id="filtroAno" class="form-control">
-                            <option value="">Todos los años</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="filtroMes">Mes:</label>
-                        <select id="filtroMes" class="form-control">
-                            <option value="">Todos los meses</option>
-                            <option value="01">Enero</option>
-                            <option value="02">Febrero</option>
-                            <option value="03">Marzo</option>
-                            <option value="04">Abril</option>
-                            <option value="05">Mayo</option>
-                            <option value="06">Junio</option>
-                            <option value="07">Julio</option>
-                            <option value="08">Agosto</option>
-                            <option value="09">Septiembre</option>
-                            <option value="10">Octubre</option>
-                            <option value="11">Noviembre</option>
-                            <option value="12">Diciembre</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button type="button" class="btn btn-primary" onclick="aplicarFiltros()">🔍 Filtrar</button>
+            <!-- Resumen general -->
+            <div class="card">
+                <div class="card-header">
+                    📋 Resumen General
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; text-align: center;">
+                        <div>
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);" id="totalPagosHistorial">0</div>
+                            <div style="font-size: 0.9rem; color: #666;">Total Pagos</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--success-color);" id="montoTotalHistorial">$0</div>
+                            <div style="font-size: 0.9rem; color: #666;">Monto Total</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--secondary-color);" id="promedioMensual">$0</div>
+                            <div style="font-size: 0.9rem; color: #666;">Promedio Mensual</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);" id="ultimoMesPagado">-</div>
+                            <div style="font-size: 0.9rem; color: #666;">Último Mes</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Tabla de historial -->
-        <div class="info-section">
-            <div class="info-card">
-                <h3>📋 Historial Detallado</h3>
-                <div style="overflow-x: auto;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Fecha Pago</th>
-                                <th>Mes Correspondiente</th>
-                                <th>Monto</th>
-                                <th>Método</th>
-                                <th>Observaciones</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaHistorial">
-                            <tr>
-                                <td colspan="6" class="text-center">No hay pagos registrados</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- Filtros -->
+            <div class="card">
+                <div class="card-header">
+                    🔍 Filtros
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div class="form-group">
+                            <label for="filtroAno">Año:</label>
+                            <select id="filtroAno" class="form-control">
+                                <option value="">Todos los años</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="filtroMes">Mes:</label>
+                            <select id="filtroMes" class="form-control">
+                                <option value="">Todos los meses</option>
+                                <option value="01">Enero</option>
+                                <option value="02">Febrero</option>
+                                <option value="03">Marzo</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Mayo</option>
+                                <option value="06">Junio</option>
+                                <option value="07">Julio</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="button" class="btn btn-primary" onclick="aplicarFiltros()">🔍 Filtrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de historial -->
+            <div class="card">
+                <div class="card-header">
+                    📋 Historial Detallado
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha Pago</th>
+                                    <th>Mes Correspondiente</th>
+                                    <th>Monto</th>
+                                    <th>Método</th>
+                                    <th class="hide-mobile">Observaciones</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaHistorial">
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">No hay pagos registrados</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas por año -->
+            <div class="card">
+                <div class="card-header">
+                    📈 Estadísticas por Año
+                </div>
+                <div class="card-body">
+                    <div id="estadisticasAnuales">
+                        <p>No hay datos suficientes para mostrar estadísticas</p>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Estadísticas por año -->
-        <div class="info-section">
-            <div class="info-card">
-                <h3>📈 Estadísticas por Año</h3>
-                <div id="estadisticasAnuales">
-                    <p>No hay datos suficientes para mostrar estadísticas</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    </main>
 
     <!-- Pie de página -->
     <footer class="footer">
@@ -137,13 +177,23 @@
         let pagosFiltrados = [];
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('📊 Página de historial cargada');
+            console.log('📊 Página de historial con navegación móvil mejorada');
+            
+            // Marcar navegación activa
+            setActiveNavItem();
             
             cargarDatos();
             generarFiltroAnos();
             aplicarFiltros();
             actualizarEstadisticas();
         });
+
+        function setActiveNavItem() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById('nav-historial').classList.add('active');
+        }
 
         function cargarDatos() {
             try {
@@ -198,7 +248,7 @@
             const tbody = document.getElementById('tablaHistorial');
             
             if (pagosFiltrados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay pagos que coincidan con los filtros</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay pagos que coincidan con los filtros</td></tr>';
                 return;
             }
             
@@ -211,12 +261,12 @@
                     <tr>
                         <td>${formatearFecha(pago.fecha)}</td>
                         <td>${formatearMes(pago.mesCorrespondiente)}</td>
-                        <td><strong>${formatearPesos(pago.monto)}</strong></td>
-                        <td><span class="status-paid">${pago.metodo}</span></td>
-                        <td>${pago.observaciones || '-'}</td>
+                        <td><strong style="color: var(--success-color);">${formatearPesos(pago.monto)}</strong></td>
+                        <td><span style="background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">${pago.metodo}</span></td>
+                        <td class="hide-mobile">${pago.observaciones || '-'}</td>
                         <td>
-                            <button class="btn btn-danger" onclick="eliminarPago(${pago.id})" 
-                                    style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                            <button class="btn" onclick="eliminarPago(${pago.id})" 
+                                    style="background: #e74c3c; color: white; padding: 4px 8px; font-size: 0.8rem; border-radius: 4px;">
                                 🗑️
                             </button>
                         </td>
@@ -267,17 +317,17 @@
                 estadisticasPorAno[ano].monto += pago.monto;
             });
             
-            let html = '<div class="summary-cards">';
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">';
             
             Object.keys(estadisticasPorAno)
                 .sort((a, b) => b - a)
                 .forEach(ano => {
                     const stats = estadisticasPorAno[ano];
                     html += `
-                        <div class="summary-item">
-                            <div class="summary-number">${ano}</div>
-                            <div class="summary-label">${stats.pagos} pagos</div>
-                            <small>${formatearPesos(stats.monto)}</small>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border-left: 4px solid var(--primary-color);">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">${ano}</div>
+                            <div style="font-size: 0.9rem; color: #666; margin: 5px 0;">${stats.pagos} pagos</div>
+                            <div style="font-size: 0.9rem; font-weight: bold; color: var(--success-color);">${formatearPesos(stats.monto)}</div>
                         </div>
                     `;
                 });
@@ -300,7 +350,7 @@
                     aplicarFiltros();
                     actualizarEstadisticas();
                     
-                    alert('✅ Pago eliminado correctamente');
+                    mostrarAlerta('✅ Pago eliminado correctamente', 'success');
                 } catch (error) {
                     console.error('❌ Error eliminando pago:', error);
                     alert('Error al eliminar el pago');
@@ -327,6 +377,34 @@
                 year: 'numeric', 
                 month: 'long' 
             });
+        }
+
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            const alertaExistente = document.querySelector('.alert');
+            if (alertaExistente) {
+                alertaExistente.remove();
+            }
+            
+            const alerta = document.createElement('div');
+            alerta.className = `alert alert-${tipo}`;
+            alerta.textContent = mensaje;
+            alerta.style.cssText = `
+                padding: 12px 20px;
+                margin: 10px 0;
+                border-radius: 8px;
+                background: ${tipo === 'success' ? '#27ae60' : '#3498db'};
+                color: white;
+                font-weight: 500;
+            `;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(alerta, container.firstChild);
+            
+            setTimeout(() => {
+                if (alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 5000);
         }
     </script>
 </body>

@@ -5,96 +5,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Pagos - Pensión Alimenticia</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/mobile-nav.css">
 </head>
 <body>
-    <!-- Navegación -->
-    <nav class="navbar">
+    <!-- NUEVA NAVEGACIÓN MÓVIL -->
+    <nav class="main-nav">
         <div class="nav-container">
-            <h1 class="nav-title">💰 Pensión Alimenticia</h1>
-            <div class="nav-menu">
-                <a href="/" class="nav-link">🏠 Inicio</a>
-                <a href="/calculadora.html" class="nav-link">🧮 Calculadora</a>
-                <a href="/pagos.html" class="nav-link active">💳 Pagos</a>
-                <a href="/historial.html" class="nav-link">📊 Historial</a>
-            </div>
+            <a href="/" class="nav-brand">
+                Pensión UTM
+            </a>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link" id="nav-home">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/calculadora.html" class="nav-link" id="nav-calc">
+                        <span class="nav-icon">🧮</span>
+                        <span class="nav-text">Calcular</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/pagos.html" class="nav-link" id="nav-pagos">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Pagos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/historial.html" class="nav-link" id="nav-historial">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Historial</span>
+                    </a>
+                </li>
+            </ul>
         </div>
     </nav>
 
-    <!-- Contenido principal -->
-    <div class="container">
-        <!-- Título de la página -->
-        <div class="welcome-section">
-            <h1>💳 Registrar Nuevo Pago</h1>
-            <p class="subtitle">Anota los pagos realizados para llevar un control exacto</p>
-        </div>
-
-        <!-- Formulario de registro -->
-        <div class="quick-summary">
-            <h2>📝 Datos del Pago</h2>
-            
-            <form id="formPago">
-                <div class="form-group">
-                    <label for="fechaPago">Fecha del pago:</label>
-                    <input type="date" id="fechaPago" class="form-control" required>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Título de la página -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    💳 Registrar Nuevo Pago
                 </div>
-
-                <div class="form-group">
-                    <label for="mesCorrespondiente">Mes correspondiente:</label>
-                    <input type="month" id="mesCorrespondiente" class="form-control" required>
+                <div class="card-body">
+                    <p>Anota los pagos realizados para llevar un control exacto</p>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="montoPago">Monto pagado:</label>
-                    <input type="number" id="montoPago" class="form-control" placeholder="240000" required>
+            <!-- Formulario de registro -->
+            <div class="card">
+                <div class="card-header">
+                    📝 Datos del Pago
                 </div>
+                <div class="card-body">
+                    <form id="formPago">
+                        <div class="form-group">
+                            <label for="fechaPago">Fecha del pago:</label>
+                            <input type="date" id="fechaPago" class="form-control" required>
+                        </div>
 
-                <div class="form-group">
-                    <label for="metodoPago">Método de pago:</label>
-                    <select id="metodoPago" class="form-control" required>
-                        <option value="">Seleccionar método</option>
-                        <option value="transferencia">Transferencia Bancaria</option>
-                        <option value="deposito">Depósito en Cuenta</option>
-                        <option value="efectivo">Efectivo</option>
-                        <option value="cheque">Cheque</option>
-                    </select>
+                        <div class="form-group">
+                            <label for="mesCorrespondiente">Mes correspondiente:</label>
+                            <input type="month" id="mesCorrespondiente" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="montoPago">Monto pagado:</label>
+                            <input type="number" id="montoPago" class="form-control" placeholder="240000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="metodoPago">Método de pago:</label>
+                            <select id="metodoPago" class="form-control" required>
+                                <option value="">Seleccionar método</option>
+                                <option value="transferencia">Transferencia Bancaria</option>
+                                <option value="deposito">Depósito en Cuenta</option>
+                                <option value="efectivo">Efectivo</option>
+                                <option value="cheque">Cheque</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="observaciones">Observaciones (opcional):</label>
+                            <textarea id="observaciones" class="form-control" rows="3" placeholder="Número de transferencia, detalles adicionales, etc."></textarea>
+                        </div>
+
+                        <div class="form-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button type="submit" class="btn btn-success">💾 Guardar Pago</button>
+                            <button type="button" class="btn btn-primary" onclick="limpiarFormulario()">🗑️ Limpiar</button>
+                        </div>
+                    </form>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="observaciones">Observaciones (opcional):</label>
-                    <textarea id="observaciones" class="form-control" rows="3" placeholder="Número de transferencia, detalles adicionales, etc."></textarea>
+            <!-- Pagos recientes -->
+            <div class="card">
+                <div class="card-header">
+                    📋 Últimos Pagos Registrados
                 </div>
-
-                <div class="form-group">
-                    <button type="submit" class="btn btn-success">💾 Guardar Pago</button>
-                    <button type="button" class="btn btn-danger" onclick="limpiarFormulario()">🗑️ Limpiar</button>
+                <div class="card-body">
+                    <div id="listaPagosRecientes">
+                        <p>No hay pagos registrados aún.</p>
+                    </div>
                 </div>
-            </form>
-        </div>
+            </div>
 
-        <!-- Pagos recientes -->
-        <div class="info-section">
-            <div class="info-card">
-                <h3>📋 Últimos Pagos Registrados</h3>
-                <div id="listaPagosRecientes">
-                    <p>No hay pagos registrados aún.</p>
+            <!-- Guía rápida -->
+            <div class="card">
+                <div class="card-header">
+                    💡 Guía Rápida
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>Fecha del pago:</strong> Cuándo realizaste el pago</li>
+                        <li><strong>Mes correspondiente:</strong> A qué mes de pensión corresponde</li>
+                        <li><strong>Monto:</strong> Cantidad exacta que pagaste</li>
+                        <li><strong>Método:</strong> Cómo realizaste el pago</li>
+                        <li><strong>Observaciones:</strong> Detalles como número de transferencia</li>
+                    </ul>
                 </div>
             </div>
         </div>
-
-        <!-- Guía rápida -->
-        <div class="info-section">
-            <div class="info-card">
-                <h3>💡 Guía Rápida</h3>
-                <ul>
-                    <li><strong>Fecha del pago:</strong> Cuándo realizaste el pago</li>
-                    <li><strong>Mes correspondiente:</strong> A qué mes de pensión corresponde</li>
-                    <li><strong>Monto:</strong> Cantidad exacta que pagaste</li>
-                    <li><strong>Método:</strong> Cómo realizaste el pago</li>
-                    <li><strong>Observaciones:</strong> Detalles como número de transferencia</li>
-                </ul>
-            </div>
-        </div>
-    </div>
+    </main>
 
     <!-- Pie de página -->
     <footer class="footer">
@@ -107,7 +144,10 @@
         let pagosLocales = [];
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('💳 Página de pagos cargada');
+            console.log('💳 Página de pagos con navegación móvil mejorada');
+            
+            // Marcar navegación activa
+            setActiveNavItem();
             
             // Establecer fecha actual
             const fechaActual = new Date().toISOString().split('T')[0];
@@ -127,6 +167,13 @@
                 registrarPago();
             });
         });
+
+        function setActiveNavItem() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById('nav-pagos').classList.add('active');
+        }
 
         function registrarPago() {
             try {
@@ -171,7 +218,7 @@
                 limpiarFormulario();
                 
                 // Mostrar confirmación
-                alert('✅ Pago registrado correctamente');
+                mostrarAlerta('✅ Pago registrado correctamente', 'success');
                 
                 console.log('✅ Pago registrado:', nuevoPago);
                 
@@ -225,14 +272,15 @@
                 .sort((a, b) => new Date(b.fechaRegistro) - new Date(a.fechaRegistro))
                 .slice(0, 5);
             
-            let html = '<div class="summary-cards">';
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">';
             
             pagosRecientes.forEach(pago => {
                 html += `
-                    <div class="summary-item">
-                        <div class="summary-number">${formatearPesos(pago.monto)}</div>
-                        <div class="summary-label">${formatearFecha(pago.fecha)}</div>
-                        <small>Para: ${formatearMes(pago.mesCorrespondiente)}</small>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid var(--success-color);">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--success-color);">${formatearPesos(pago.monto)}</div>
+                        <div style="font-size: 0.9rem; color: #666; margin: 5px 0;">Pagado: ${formatearFecha(pago.fecha)}</div>
+                        <div style="font-size: 0.9rem; color: #666;">Para: ${formatearMes(pago.mesCorrespondiente)}</div>
+                        <div style="font-size: 0.8rem; color: #999; margin-top: 5px;">${pago.metodo}</div>
                     </div>
                 `;
             });
@@ -260,6 +308,34 @@
                 year: 'numeric', 
                 month: 'long' 
             });
+        }
+
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            const alertaExistente = document.querySelector('.alert');
+            if (alertaExistente) {
+                alertaExistente.remove();
+            }
+            
+            const alerta = document.createElement('div');
+            alerta.className = `alert alert-${tipo}`;
+            alerta.textContent = mensaje;
+            alerta.style.cssText = `
+                padding: 12px 20px;
+                margin: 10px 0;
+                border-radius: 8px;
+                background: ${tipo === 'success' ? '#27ae60' : '#3498db'};
+                color: white;
+                font-weight: 500;
+            `;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(alerta, container.firstChild);
+            
+            setTimeout(() => {
+                if (alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 5000);
         }
     </script>
 </body>

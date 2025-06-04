@@ -22,6 +22,7 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/mobile-nav.css">
     
     <!-- PWA Install prompt styling -->
     <style>
@@ -34,7 +35,7 @@
             color: white;
             padding: 15px 20px;
             box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
-            z-index: 1000;
+            z-index: 999;
             display: none;
             animation: slideUp 0.3s ease;
         }
@@ -105,22 +106,6 @@
             padding: 5px 10px;
         }
         
-        .mobile-instructions {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            text-align: center;
-        }
-        
-        .mobile-instructions.android {
-            display: none;
-        }
-        
-        .mobile-instructions.ios {
-            display: none;
-        }
-        
         @media (max-width: 768px) {
             .install-content {
                 flex-direction: column;
@@ -145,117 +130,160 @@
         </div>
     </div>
 
-    <!-- Navegación -->
-    <nav class="navbar">
+    <!-- NUEVA NAVEGACIÓN MÓVIL -->
+    <nav class="main-nav">
         <div class="nav-container">
-            <h1 class="nav-title">💰 Pensión Alimenticia</h1>
-            <div class="nav-menu">
-                <a href="/" class="nav-link active">🏠 Inicio</a>
-                <a href="/calculadora.html" class="nav-link">🧮 Calculadora</a>
-                <a href="/pagos.html" class="nav-link">💳 Pagos</a>
-                <a href="/historial.html" class="nav-link">📊 Historial</a>
-            </div>
+            <a href="/" class="nav-brand">
+                Pensión UTM
+            </a>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link" id="nav-home">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/calculadora.html" class="nav-link" id="nav-calc">
+                        <span class="nav-icon">🧮</span>
+                        <span class="nav-text">Calcular</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/pagos.html" class="nav-link" id="nav-pagos">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Pagos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/historial.html" class="nav-link" id="nav-historial">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Historial</span>
+                    </a>
+                </li>
+            </ul>
         </div>
     </nav>
 
-    <!-- Contenido principal -->
-    <div class="container">
-        <!-- Bienvenida -->
-        <div class="welcome-section">
-            <h1>¡Bienvenido a tu App de Pensión Alimenticia!</h1>
-            <p class="subtitle">Gestiona fácilmente tus pagos basados en UTM (3.51360 UTM)</p>
-            
-            <!-- Estado de la app -->
-            <div id="appStatus" style="margin-top: 20px;">
-                <small id="statusText">🔄 Verificando estado de la app...</small>
-            </div>
-        </div>
-
-        <!-- Instrucciones de instalación móvil -->
-        <div id="mobileInstructions" class="mobile-instructions" style="display: none;">
-            <h3>📱 Cómo instalar en tu dispositivo</h3>
-            <div id="androidInstructions" class="android">
-                <p><strong>En Android (Chrome):</strong></p>
-                <p>1. Toca el menú (⋮) arriba a la derecha</p>
-                <p>2. Selecciona "Instalar app" o "Agregar a pantalla de inicio"</p>
-                <p>3. Confirma la instalación</p>
-            </div>
-            <div id="iosInstructions" class="ios">
-                <p><strong>En iPhone (Safari):</strong></p>
-                <p>1. Toca el botón de compartir (📤) abajo</p>
-                <p>2. Selecciona "Añadir a pantalla de inicio"</p>
-                <p>3. Confirma el nombre y toca "Añadir"</p>
-            </div>
-            <button onclick="mostrarInstruccionesEspecificas()" class="btn btn-info" style="margin-top: 10px;">
-                📋 Ver instrucciones específicas
-            </button>
-        </div>
-
-        <!-- Tarjetas de acceso rápido -->
-        <div class="cards-grid">
-            <!-- Calculadora UTM -->
-            <div class="card card-calculator">
-                <div class="card-icon">🧮</div>
-                <h2>Calculadora UTM</h2>
-                <p>Calcula cuánto debes pagar este mes basado en el valor actual de la UTM.</p>
-                <a href="/calculadora.html" class="btn btn-primary">Calcular Ahora</a>
-            </div>
-
-            <!-- Registrar Pago -->
-            <div class="card card-payment">
-                <div class="card-icon">💳</div>
-                <h2>Registrar Pago</h2>
-                <p>Anota los pagos que has realizado para llevar un control exacto.</p>
-                <a href="/pagos.html" class="btn btn-success">Agregar Pago</a>
-            </div>
-
-            <!-- Ver Historial -->
-            <div class="card card-history">
-                <div class="card-icon">📊</div>
-                <h2>Ver Historial</h2>
-                <p>Consulta todos tus pagos anteriores y el estado de cada mes.</p>
-                <a href="/historial.html" class="btn btn-info">Ver Historial</a>
-            </div>
-        </div>
-
-        <!-- Resumen rápido -->
-        <div class="quick-summary">
-            <h2>📋 Resumen Rápido</h2>
-            <div class="summary-cards">
-                <div class="summary-item">
-                    <div class="summary-number" id="totalPagos">0</div>
-                    <div class="summary-label">Pagos Registrados</div>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Bienvenida -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    ¡Bienvenido a tu App de Pensión Alimenticia!
                 </div>
-                <div class="summary-item">
-                    <div class="summary-number" id="montoTotal">$0</div>
-                    <div class="summary-label">Total Pagado</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number" id="ultimoPago">-</div>
-                    <div class="summary-label">Último Pago</div>
+                <div class="card-body">
+                    <p>Gestiona fácilmente tus pagos basados en UTM (3.51360 UTM)</p>
+                    
+                    <!-- Estado de la app -->
+                    <div id="appStatus" style="margin-top: 20px;">
+                        <small id="statusText">🔄 Verificando estado de la app...</small>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Información importante -->
-        <div class="info-section">
-            <div class="info-card">
-                <h3>ℹ️ Información Importante</h3>
-                <ul>
-                    <li><strong>Monto base:</strong> 3.51360 UTM</li>
-                    <li><strong>Equivalencia inicial:</strong> $240.000 (cuando se fijó)</li>
-                    <li><strong>Actualización:</strong> El monto cambia según el valor UTM mensual</li>
-                    <li><strong>Consulta UTM:</strong> Valores oficiales desde API confiable</li>
-                    <li><strong>Offline:</strong> La app funciona sin internet</li>
-                </ul>
+            <!-- Instrucciones de instalación móvil -->
+            <div id="mobileInstructions" class="card" style="display: none;">
+                <div class="card-header">
+                    📱 Cómo instalar en tu dispositivo
+                </div>
+                <div class="card-body">
+                    <div id="androidInstructions" class="android">
+                        <p><strong>En Android (Chrome):</strong></p>
+                        <p>1. Toca el menú (⋮) arriba a la derecha</p>
+                        <p>2. Selecciona "Instalar app" o "Agregar a pantalla de inicio"</p>
+                        <p>3. Confirma la instalación</p>
+                    </div>
+                    <div id="iosInstructions" class="ios">
+                        <p><strong>En iPhone (Safari):</strong></p>
+                        <p>1. Toca el botón de compartir (📤) abajo</p>
+                        <p>2. Selecciona "Añadir a pantalla de inicio"</p>
+                        <p>3. Confirma el nombre y toca "Añadir"</p>
+                    </div>
+                    <button onclick="mostrarInstruccionesEspecificas()" class="btn btn-primary" style="margin-top: 10px;">
+                        📋 Ver instrucciones específicas
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tarjetas de acceso rápido -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 20px 0;">
+                <!-- Calculadora UTM -->
+                <div class="card slide-up">
+                    <div class="card-header">
+                        🧮 Calculadora UTM
+                    </div>
+                    <div class="card-body">
+                        <p>Calcula cuánto debes pagar este mes basado en el valor actual de la UTM.</p>
+                        <a href="/calculadora.html" class="btn btn-primary">Calcular Ahora</a>
+                    </div>
+                </div>
+
+                <!-- Registrar Pago -->
+                <div class="card slide-up">
+                    <div class="card-header">
+                        💳 Registrar Pago
+                    </div>
+                    <div class="card-body">
+                        <p>Anota los pagos que has realizado para llevar un control exacto.</p>
+                        <a href="/pagos.html" class="btn btn-success">Agregar Pago</a>
+                    </div>
+                </div>
+
+                <!-- Ver Historial -->
+                <div class="card slide-up">
+                    <div class="card-header">
+                        📊 Ver Historial
+                    </div>
+                    <div class="card-body">
+                        <p>Consulta todos tus pagos anteriores y el estado de cada mes.</p>
+                        <a href="/historial.html" class="btn btn-primary">Ver Historial</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen rápido -->
+            <div class="card slide-up">
+                <div class="card-header">
+                    📋 Resumen Rápido
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);" id="totalPagos">0</div>
+                            <div style="font-size: 0.9rem; color: #666;">Pagos Registrados</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--success-color);" id="montoTotal">$0</div>
+                            <div style="font-size: 0.9rem; color: #666;">Total Pagado</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--secondary-color);" id="ultimoPago">-</div>
+                            <div style="font-size: 0.9rem; color: #666;">Último Pago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información importante -->
+            <div class="card">
+                <div class="card-header">
+                    ℹ️ Información Importante
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>Monto base:</strong> 3.51360 UTM</li>
+                        <li><strong>Equivalencia inicial:</strong> $240.000 (cuando se fijó)</li>
+                        <li><strong>Actualización:</strong> El monto cambia según el valor UTM mensual</li>
+                        <li><strong>Consulta UTM:</strong> Valores oficiales desde API confiable</li>
+                        <li><strong>Offline:</strong> La app funciona sin internet</li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Pie de página -->
-    <footer class="footer">
-        <p>&copy; 2025 - App Pensión Alimenticia - Creado con ❤️ | PWA Lista</p>
-    </footer>
+    </main>
 
     <!-- JavaScript -->
     <script src="/js/app.js"></script>
@@ -266,7 +294,10 @@
         let isAndroid = false;
         
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🏠 Página de inicio con instalación móvil mejorada');
+            console.log('🏠 Página de inicio con navegación móvil mejorada');
+            
+            // Marcar navegación activa
+            setActiveNavItem();
             
             // Detectar dispositivo
             detectarDispositivo();
@@ -286,6 +317,13 @@
             // Mostrar banner de instalación después de 3 segundos
             setTimeout(verificarYMostrarBannerInstalacion, 3000);
         });
+
+        function setActiveNavItem() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById('nav-home').classList.add('active');
+        }
 
         function detectarDispositivo() {
             const userAgent = navigator.userAgent.toLowerCase();
@@ -350,16 +388,6 @@
                 try {
                     const registration = await navigator.serviceWorker.register('/sw.js');
                     console.log('✅ Service Worker registrado:', registration);
-                    
-                    registration.addEventListener('updatefound', () => {
-                        console.log('🔄 Nueva versión disponible');
-                        const newWorker = registration.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                mostrarNotificacionActualizacion();
-                            }
-                        });
-                    });
                 } catch (error) {
                     console.log('❌ Error registrando Service Worker:', error);
                 }
@@ -373,8 +401,6 @@
                 console.log('📱 Prompt de instalación disponible');
                 e.preventDefault();
                 deferredPrompt = e;
-                
-                // Mostrar banner personalizado
                 mostrarBannerInstalacion();
             });
 
@@ -393,7 +419,6 @@
 
         async function instalarApp() {
             if (deferredPrompt) {
-                // PWA con prompt disponible
                 console.log('📱 Mostrando prompt de instalación');
                 deferredPrompt.prompt();
                 const choiceResult = await deferredPrompt.userChoice;
@@ -407,7 +432,6 @@
                 deferredPrompt = null;
                 ocultarBannerInstalacion();
             } else {
-                // Dispositivo iOS o sin prompt - mostrar instrucciones
                 console.log('📱 Mostrando instrucciones manuales');
                 mostrarInstruccionesEspecificas();
                 
@@ -441,7 +465,6 @@
 
         function cargarResumenRapido() {
             try {
-                // Obtener datos del localStorage si existen
                 const pagosGuardados = localStorage.getItem('pension_pagos');
                 let totalPagos = 0;
                 let montoTotal = 0;
@@ -458,7 +481,6 @@
                     }
                 }
                 
-                // Actualizar el DOM
                 document.getElementById('totalPagos').textContent = totalPagos;
                 document.getElementById('montoTotal').textContent = formatearPesos(montoTotal);
                 document.getElementById('ultimoPago').textContent = ultimoPago;
@@ -477,12 +499,6 @@
             }).format(cantidad);
         }
 
-        function mostrarNotificacionActualizacion() {
-            if (confirm('🔄 Hay una nueva versión disponible. ¿Quieres actualizar?')) {
-                window.location.reload();
-            }
-        }
-
         function mostrarAlerta(mensaje, tipo = 'info') {
             const alertaExistente = document.querySelector('.alert');
             if (alertaExistente) {
@@ -492,6 +508,14 @@
             const alerta = document.createElement('div');
             alerta.className = `alert alert-${tipo}`;
             alerta.textContent = mensaje;
+            alerta.style.cssText = `
+                padding: 12px 20px;
+                margin: 10px 0;
+                border-radius: 8px;
+                background: ${tipo === 'success' ? '#27ae60' : '#3498db'};
+                color: white;
+                font-weight: 500;
+            `;
             
             const container = document.querySelector('.container');
             container.insertBefore(alerta, container.firstChild);
