@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - Pensión UTM</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/mobile-nav.css">
+</head>
+<body>
+    <!-- NAVEGACIÓN MÓVIL -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">Pensión UTM</a>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link" id="nav-home">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/calculadora.html" class="nav-link" id="nav-calc">
+                        <span class="nav-icon">🧮</span>
+                        <span class="nav-text">Calcular</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/pagos.html" class="nav-link" id="nav-pagos">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Pagos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/historial.html" class="nav-link" id="nav-historial">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Historial</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Título -->
+            <div class="card fade-in">
+                <div class="card-header">⚙️ Configuración</div>
+                <div class="card-body">
+                    <p>Personaliza el factor UTM según tu caso específico</p>
+                </div>
+            </div>
+
+            <!-- Factor UTM Actual -->
+            <div class="card">
+                <div class="card-header">📊 Factor UTM Actual</div>
+                <div class="card-body">
+                    <div style="display: grid; gap: 1rem;">
+                        <div style="text-align: center; padding: 1rem; background: rgba(63, 81, 181, 0.1); border-radius: 8px;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #3f51b5;" id="factorActual">
+                                3.51360 UTM
+                            </div>
+                            <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-top: 0.5rem;">
+                                Factor configurado actualmente
+                            </div>
+                        </div>
+                        
+                        <div id="ejemploCalculo" style="font-size: 0.9rem; color: rgba(255,255,255,0.8); text-align: center;">
+                            Ejemplo: UTM $66,566 × 3.51360 = $233,934
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modificar Factor -->
+            <div class="card">
+                <div class="card-header">✏️ Modificar Factor UTM</div>
+                <div class="card-body">
+                    <div style="margin-bottom: 1rem;">
+                        <label for="nuevoFactor" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                            Nuevo Factor UTM:
+                        </label>
+                        <input 
+                            type="number" 
+                            id="nuevoFactor" 
+                            placeholder="Ej: 3.51360" 
+                            step="0.00001" 
+                            min="0.00001" 
+                            max="50"
+                            style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; font-size: 1.1rem; text-align: center;"
+                        >
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 0.5rem;">
+                            Ingresa el factor específico para tu caso (por ejemplo: 2.5, 4.0, 5.25)
+                        </div>
+                    </div>
+
+                    <div style="display: grid; gap: 0.5rem;">
+                        <button class="btn btn-success" onclick="guardarNuevoFactor()" style="width: 100%;">
+                            💾 Guardar Nuevo Factor
+                        </button>
+                        
+                        <button class="btn btn-primary" onclick="restaurarFactorOriginal()" style="width: 100%;">
+                            🔄 Restaurar Factor Original (3.51360)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información Legal -->
+            <div class="card">
+                <div class="card-header">⚖️ Información Legal</div>
+                <div class="card-body">
+                    <div style="font-size: 0.9rem; line-height: 1.6;">
+                        <p><strong>Factor por defecto:</strong> 3.51360 UTM</p>
+                        <p><strong>Base legal:</strong> Según normativa chilena estándar</p>
+                        
+                        <div style="margin: 1rem 0; padding: 1rem; background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; border-radius: 4px;">
+                            <p><strong>⚠️ Importante:</strong></p>
+                            <p>El factor UTM debe estar especificado en tu resolución judicial o acuerdo. Consulta con un abogado si tienes dudas sobre el factor correcto para tu caso.</p>
+                        </div>
+                        
+                        <p><strong>Casos comunes:</strong></p>
+                        <ul style="margin-left: 1rem;">
+                            <li>• <strong>3.51360 UTM:</strong> Factor estándar más común</li>
+                            <li>• <strong>2.5 UTM:</strong> Casos con ingresos menores</li>
+                            <li>• <strong>5.0 UTM:</strong> Casos con ingresos mayores</li>
+                            <li>• <strong>Personalizado:</strong> Según resolución específica</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial de Cambios -->
+            <div class="card">
+                <div class="card-header">📝 Historial de Configuración</div>
+                <div class="card-body">
+                    <div id="historialConfig">
+                        <p style="color: rgba(255,255,255,0.6); text-align: center;">
+                            No hay cambios registrados
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <button class="btn btn-primary" onclick="limpiarHistorial()" style="font-size: 0.8rem; padding: 0.5rem 1rem;">
+                            🗑️ Limpiar Historial
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones Adicionales -->
+            <div class="card">
+                <div class="card-header">🔧 Otras Opciones</div>
+                <div class="card-body">
+                    <div style="display: grid; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="exportarConfiguracion()">
+                            📤 Exportar Configuración
+                        </button>
+                        
+                        <button class="btn btn-primary" onclick="document.getElementById('importConfig').click()">
+                            📥 Importar Configuración
+                        </button>
+                        <input type="file" id="importConfig" accept=".json" onchange="importarConfiguracion(event)" style="display: none;">
+                        
+                        <a href="/backup.html" class="btn btn-primary">
+                            🛡️ Backup Completo de Datos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="/js/app.js"></script>
+    <script src="/js/utm-api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('⚙️ Página de configuración cargada');
+            inicializarConfiguracion();
+        });
+
+        // INICIALIZAR CONFIGURACIÓN
+        function inicializarConfiguracion() {
+            cargarFactorActual();
+            cargarHistorialConfig();
+            actualizarEjemploCalculo();
+        }
+
+        // CARGAR FACTOR ACTUAL
+        function cargarFactorActual() {
+            const factor = obtenerFactorGuardado();
+            document.getElementById('factorActual').textContent = `${factor} UTM`;
+            document.getElementById('nuevoFactor').value = factor;
+        }
+
+        // OBTENER FACTOR GUARDADO
+        function obtenerFactorGuardado() {
+            const factorGuardado = localStorage.getItem('pension_factor_utm');
+            return factorGuardado ? parseFloat(factorGuardado) : 3.51360;
+        }
+
+        // GUARDAR NUEVO FACTOR
+        function guardarNuevoFactor() {
+            const nuevoFactorInput = document.getElementById('nuevoFactor');
+            const nuevoFactor = parseFloat(nuevoFactorInput.value);
+
+            // Validaciones
+            if (isNaN(nuevoFactor)) {
+                mostrarAlerta('❌ Por favor ingresa un número válido', 'danger');
+                return;
+            }
+
+            if (nuevoFactor <= 0) {
+                mostrarAlerta('❌ El factor debe ser mayor que 0', 'danger');
+                return;
+            }
+
+            if (nuevoFactor > 50) {
+                mostrarAlerta('❌ El factor no puede ser mayor que 50 UTM', 'danger');
+                return;
+            }
+
+            // Confirmar cambio
+            const confirmar = confirm(`¿Confirmas cambiar el factor UTM a ${nuevoFactor}?\n\nEsto afectará todos los cálculos futuros.`);
+            if (!confirmar) return;
+
+            // Guardar nuevo factor
+            localStorage.setItem('pension_factor_utm', nuevoFactor.toString());
+            
+            // Registrar en historial
+            registrarCambioConfig(nuevoFactor);
+            
+            // Actualizar interfaz
+            cargarFactorActual();
+            actualizarEjemploCalculo();
+            cargarHistorialConfig();
+
+            mostrarAlerta(`✅ Factor UTM actualizado a ${nuevoFactor}`, 'success');
+        }
+
+        // RESTAURAR FACTOR ORIGINAL
+        function restaurarFactorOriginal() {
+            const confirmar = confirm('¿Restaurar el factor UTM original (3.51360)?\n\nEsto reemplazará tu configuración actual.');
+            if (!confirmar) return;
+
+            localStorage.setItem('pension_factor_utm', '3.51360');
+            registrarCambioConfig(3.51360, 'Restaurado a valor original');
+            
+            cargarFactorActual();
+            actualizarEjemploCalculo();
+            cargarHistorialConfig();
+
+            mostrarAlerta('✅ Factor UTM restaurado al valor original', 'success');
+        }
+
+        // ACTUALIZAR EJEMPLO DE CÁLCULO
+        async function actualizarEjemploCalculo() {
+            try {
+                const factor = obtenerFactorGuardado();
+                
+                // Obtener UTM actual si está disponible
+                let utmActual = 66566; // Valor por defecto
+                if (window.UTMAPI) {
+                    const result = await window.UTMAPI.obtenerUTMActual();
+                    if (result && result.utm) {
+                        utmActual = result.utm;
+                    }
+                }
+
+                const monto = Math.round(utmActual * factor);
+                const montoFormateado = new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: 'CLP',
+                    minimumFractionDigits: 0
+                }).format(monto);
+
+                document.getElementById('ejemploCalculo').textContent = 
+                    `Ejemplo: UTM $${utmActual.toLocaleString('es-CL')} × ${factor} = ${montoFormateado}`;
+                    
+            } catch (error) {
+                console.error('Error actualizando ejemplo:', error);
+            }
+        }
+
+        // REGISTRAR CAMBIO EN HISTORIAL
+        function registrarCambioConfig(nuevoFactor, nota = '') {
+            try {
+                const historial = JSON.parse(localStorage.getItem('pension_config_historial') || '[]');
+                
+                const cambio = {
+                    fecha: new Date().toISOString(),
+                    factorAnterior: historial.length > 0 ? historial[historial.length - 1].factorNuevo : 3.51360,
+                    factorNuevo: nuevoFactor,
+                    nota: nota
+                };
+
+                historial.push(cambio);
+                
+                // Mantener solo los últimos 10 cambios
+                if (historial.length > 10) {
+                    historial.splice(0, historial.length - 10);
+                }
+
+                localStorage.setItem('pension_config_historial', JSON.stringify(historial));
+            } catch (error) {
+                console.error('Error registrando historial:', error);
+            }
+        }
+
+        // CARGAR HISTORIAL DE CONFIGURACIÓN
+        function cargarHistorialConfig() {
+            try {
+                const historial = JSON.parse(localStorage.getItem('pension_config_historial') || '[]');
+                const container = document.getElementById('historialConfig');
+
+                if (historial.length === 0) {
+                    container.innerHTML = '<p style="color: rgba(255,255,255,0.6); text-align: center;">No hay cambios registrados</p>';
+                    return;
+                }
+
+                let html = '';
+                historial.reverse().forEach((cambio, index) => {
+                    const fecha = new Date(cambio.fecha).toLocaleDateString('es-CL', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    html += `
+                        <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 6px; margin-bottom: 0.5rem; border-left: 3px solid #3f51b5;">
+                            <div style="font-size: 0.9rem; font-weight: 500;">
+                                ${cambio.factorAnterior} → ${cambio.factorNuevo} UTM
+                            </div>
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">
+                                ${fecha}${cambio.nota ? ` • ${cambio.nota}` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error cargando historial:', error);
+            }
+        }
+
+        // LIMPIAR HISTORIAL
+        function limpiarHistorial() {
+            const confirmar = confirm('¿Eliminar todo el historial de configuración?\n\nEsta acción no se puede deshacer.');
+            if (!confirmar) return;
+
+            localStorage.removeItem('pension_config_historial');
+            cargarHistorialConfig();
+            mostrarAlerta('✅ Historial de configuración eliminado', 'success');
+        }
+
+        // EXPORTAR CONFIGURACIÓN
+        function exportarConfiguracion() {
+            try {
+                const config = {
+                    version: '1.0',
+                    fecha: new Date().toISOString(),
+                    factorUTM: obtenerFactorGuardado(),
+                    historial: JSON.parse(localStorage.getItem('pension_config_historial') || '[]')
+                };
+
+                const jsonString = JSON.stringify(config, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+
+                const nombreArchivo = `pension-configuracion-${new Date().toISOString().slice(0,10)}.json`;
+
+                const enlace = document.createElement('a');
+                enlace.href = url;
+                enlace.download = nombreArchivo;
+                enlace.style.display = 'none';
+                document.body.appendChild(enlace);
+                enlace.click();
+                document.body.removeChild(enlace);
+
+                URL.revokeObjectURL(url);
+
+                mostrarAlerta(`✅ Configuración exportada: ${nombreArchivo}`, 'success');
+            } catch (error) {
+                console.error('Error exportando configuración:', error);
+                mostrarAlerta('❌ Error al exportar configuración', 'danger');
+            }
+        }
+
+        // IMPORTAR CONFIGURACIÓN
+        function importarConfiguracion(event) {
+            const archivo = event.target.files[0];
+            if (!archivo) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const config = JSON.parse(e.target.result);
+                    
+                    if (!config.factorUTM || isNaN(config.factorUTM)) {
+                        throw new Error('Archivo de configuración inválido');
+                    }
+
+                    const confirmar = confirm(`¿Importar configuración con factor ${config.factorUTM} UTM?\n\nEsto reemplazará tu configuración actual.`);
+                    if (!confirmar) return;
+
+                    localStorage.setItem('pension_factor_utm', config.factorUTM.toString());
+                    
+                    if (config.historial && Array.isArray(config.historial)) {
+                        localStorage.setItem('pension_config_historial', JSON.stringify(config.historial));
+                    }
+
+                    registrarCambioConfig(config.factorUTM, 'Importado desde archivo');
+
+                    cargarFactorActual();
+                    actualizarEjemploCalculo();
+                    cargarHistorialConfig();
+
+                    mostrarAlerta(`✅ Configuración importada: factor ${config.factorUTM} UTM`, 'success');
+
+                } catch (error) {
+                    console.error('Error importando:', error);
+                    mostrarAlerta('❌ Error al importar configuración', 'danger');
+                }
+            };
+
+            reader.readAsText(archivo);
+            event.target.value = '';
+        }
+
+        // FUNCIÓN AUXILIAR PARA MOSTRAR ALERTAS
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            if (window.PensionApp && window.PensionApp.mostrarAlerta) {
+                window.PensionApp.mostrarAlerta(mensaje, tipo);
+            } else {
+                // Fallback
+                const alertaExistente = document.querySelector('.alert');
+                if (alertaExistente) {
+                    alertaExistente.remove();
+                }
+                
+                const alerta = document.createElement('div');
+                alerta.className = `alert alert-${tipo}`;
+                alerta.textContent = mensaje;
+                alerta.style.cssText = `
+                    padding: 0.75rem 1rem;
+                    margin: 1rem 0;
+                    border-radius: 12px;
+                    background: ${tipo === 'success' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)'};
+                    color: ${tipo === 'success' ? '#81c784' : '#e57373'};
+                    border: 1px solid ${tipo === 'success' ? 'rgba(76, 175, 80, 0.3)' : 'rgba(244, 67, 54, 0.3)'};
+                `;
+                
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.insertBefore(alerta, container.firstChild);
+                    
+                    setTimeout(() => {
+                        if (alerta.parentNode) {
+                            alerta.remove();
+                        }
+                    }, 4000);
+                }
+            }
+        }
+
+        // Actualizar ejemplo cuando cambie la UTM
+        setInterval(actualizarEjemploCalculo, 30000); // Cada 30 segundos
+    </script>
+</body>
+</html>

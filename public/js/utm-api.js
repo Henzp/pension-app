@@ -1,4 +1,4 @@
-// utm-api.js - Sistema UTM que SIEMPRE funciona
+// utm-api.js - Sistema UTM con factor personalizable
 
 class UTMAPI {
     constructor() {
@@ -131,9 +131,32 @@ class UTMAPI {
         }
     }
 
-    // Calcular pensión (3.51360 UTM)
-    calcularPension(utm) {
-        const factor = 3.51360;
+    // NUEVO: Obtener factor UTM personalizado
+    obtenerFactorPersonalizado() {
+        const factorGuardado = localStorage.getItem('pension_factor_utm');
+        return factorGuardado ? parseFloat(factorGuardado) : 3.51360;
+    }
+
+    // NUEVO: Guardar factor UTM personalizado
+    guardarFactorPersonalizado(factor) {
+        localStorage.setItem('pension_factor_utm', factor.toString());
+    }
+
+    // ACTUALIZADO: Calcular pensión con factor personalizable
+    calcularPension(utm, factorCustom = null) {
+        const factor = factorCustom || this.obtenerFactorPersonalizado();
+        const monto = utm * factor;
+        return {
+            utm: utm,
+            factor: factor,
+            monto: Math.round(monto),
+            montoFormateado: this.formatearUTM(monto),
+            esFactorPersonalizado: factor !== 3.51360
+        };
+    }
+
+    // NUEVO: Calcular con factor específico (para comparaciones)
+    calcularConFactor(utm, factor) {
         const monto = utm * factor;
         return {
             utm: utm,
@@ -162,6 +185,22 @@ class UTMAPI {
             return true; // Incluso con error, mostramos "Online"
         }
     }
+
+    // NUEVO: Obtener información completa de configuración
+    obtenerConfiguracion() {
+        return {
+            factorUTM: this.obtenerFactorPersonalizado(),
+            factorEsPersonalizado: this.obtenerFactorPersonalizado() !== 3.51360,
+            historialCambios: JSON.parse(localStorage.getItem('pension_config_historial') || '[]')
+        };
+    }
+
+    // NUEVO: Restablecer configuración a valores por defecto
+    restablecerConfiguracion() {
+        localStorage.removeItem('pension_factor_utm');
+        localStorage.removeItem('pension_config_historial');
+        console.log('✅ Configuración restablecida a valores por defecto');
+    }
 }
 
 // Crear instancia global
@@ -174,15 +213,25 @@ window.obtenerUTMPorMes = (mesAno) => {
     return window.UTMAPI.obtenerUTMPorMes(parseInt(mes), parseInt(año));
 };
 
+// NUEVAS funciones globales para factor personalizado
+window.obtenerFactorUTM = () => window.UTMAPI.obtenerFactorPersonalizado();
+window.calcularPensionUTM = (utm, factor = null) => window.UTMAPI.calcularPension(utm, factor);
+
 // Auto-inicialización
 document.addEventListener('DOMContentLoaded', async function() {
     try {
         console.log('🚀 Iniciando sistema UTM...');
         await window.UTMAPI.obtenerUTMActual();
+        
+        const config = window.UTMAPI.obtenerConfiguracion();
+        if (config.factorEsPersonalizado) {
+            console.log(`⚙️ Factor personalizado activo: ${config.factorUTM} UTM`);
+        }
+        
         console.log('✅ Sistema UTM inicializado correctamente');
     } catch (error) {
         console.log('✅ Sistema UTM funcionando con valores locales');
     }
 });
 
-console.log('📊 UTM API cargado - VERSIÓN ESTABLE que siempre funciona');
+console.log('📊 UTM API cargado - VERSIÓN CON FACTOR PERSONALIZABLE');
