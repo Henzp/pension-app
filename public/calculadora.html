@@ -76,13 +76,16 @@
 
                         <div class="form-group">
                             <label for="valorUTM">Valor UTM del mes (pesos):</label>
-                            <div style="display: flex; gap: 10px;">
+                            
+                            <!-- BOTÓN ARREGLADO CON MEJOR CSS -->
+                            <div class="input-button-group">
                                 <input type="number" id="valorUTM" class="form-control" placeholder="68310" required readonly>
-                                <button type="button" class="btn btn-primary" onclick="obtenerUTMDelMes()" 
-                                        style="white-space: nowrap; min-width: 120px;">
-                                    📡 Obtener UTM
+                                <button type="button" class="btn btn-primary btn-responsive btn-compact" onclick="obtenerUTMDelMes()">
+                                    <span>📡</span>
+                                    <span class="hide-on-small">Obtener</span>
                                 </button>
                             </div>
+                            
                             <small id="fuenteUTM" style="color: rgba(255,255,255,0.7); font-size: 0.8rem; margin-top: 0.5rem; display: block;"></small>
                         </div>
 
@@ -127,6 +130,26 @@
             </div>
         </div>
     </main>
+
+    <!-- CSS adicional para ocultar texto en pantallas muy pequeñas -->
+    <style>
+        @media (max-width: 400px) {
+            .hide-on-small {
+                display: none;
+            }
+            
+            .btn-compact {
+                min-width: 50px !important;
+                padding: 0.75rem 0.5rem !important;
+            }
+        }
+        
+        @media (min-width: 401px) {
+            .hide-on-small {
+                display: inline;
+            }
+        }
+    </style>
 
     <!-- JavaScript -->
     <script src="/js/app.js"></script>
@@ -203,11 +226,11 @@
 
         async function obtenerUTMDelMes() {
             const btn = event?.target;
-            const textOriginal = btn?.textContent;
+            const textOriginal = btn?.innerHTML;
             
             try {
                 if (btn) {
-                    btn.textContent = '🔄 Obteniendo...';
+                    btn.innerHTML = '<span>🔄</span><span class="hide-on-small">Cargando</span>';
                     btn.disabled = true;
                 }
                 
@@ -238,7 +261,7 @@
                 document.getElementById('valorUTM').readOnly = false;
             } finally {
                 if (btn) {
-                    btn.textContent = textOriginal;
+                    btn.innerHTML = textOriginal;
                     btn.disabled = false;
                 }
             }

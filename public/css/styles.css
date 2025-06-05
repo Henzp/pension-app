@@ -126,6 +126,88 @@ body {
     color: var(--white);
 }
 
+/* MEJORAS PARA BOTONES */
+
+/* Contenedor flex mejorado para inputs con botones */
+.input-button-group {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.input-button-group .form-control {
+    flex: 1;
+    min-width: 0; /* Permite que se encoja */
+}
+
+.input-button-group .btn {
+    flex-shrink: 0; /* No se encoge */
+    white-space: nowrap;
+    min-width: auto;
+    padding: 0.75rem 0.8rem;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.25rem;
+}
+
+/* Botones específicos para móvil */
+@media (max-width: 768px) {
+    .input-button-group {
+        flex-direction: row; /* Mantener en fila en móvil */
+        gap: 10px;
+    }
+    
+    .input-button-group .btn {
+        min-width: 80px;
+        padding: 0.75rem 0.6rem;
+        font-size: 0.8rem;
+        min-height: 44px; /* Tamaño mínimo táctil */
+    }
+    
+    /* Botón compacto para móvil */
+    .btn-compact {
+        padding: 0.6rem 0.8rem !important;
+        font-size: 0.8rem !important;
+        line-height: 1.2 !important;
+    }
+}
+
+/* Botones responsivos mejorados */
+.btn-responsive {
+    min-width: 120px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+@media (max-width: 480px) {
+    .btn-responsive {
+        min-width: 80px;
+        font-size: 0.75rem;
+        padding: 0.6rem 0.7rem;
+    }
+}
+
+/* Arreglo específico para botones largos */
+.btn-long-text {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    line-height: 1.2;
+    word-break: keep-all;
+}
+
+@media (max-width: 576px) {
+    .btn-long-text {
+        font-size: 0.7rem;
+        padding: 0.5rem 0.6rem;
+    }
+}
+
 /* Formularios */
 .form-group {
     margin-bottom: 1rem;
