@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pensión Alimenticia - Inicio</title>
+    <title>Pensión UTM - Inicio</title>
     
     <!-- PWA Meta Tags -->
     <meta name="description" content="App para gestionar pagos de pensión alimenticia basados en UTM">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#1a237e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Pensión UTM">
@@ -23,119 +23,12 @@
     <!-- CSS -->
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/mobile-nav.css">
-    
-    <!-- PWA Install prompt styling -->
-    <style>
-        .install-banner {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 20px;
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
-            z-index: 999;
-            display: none;
-            animation: slideUp 0.3s ease;
-        }
-        
-        .install-banner.show {
-            display: block;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        
-        .install-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-        }
-        
-        .install-text {
-            flex: 1;
-        }
-        
-        .install-text h4 {
-            margin: 0 0 5px 0;
-            font-size: 16px;
-        }
-        
-        .install-text p {
-            margin: 0;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .install-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .install-btn {
-            background: rgba(255,255,255,0.9);
-            color: #333;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .install-btn.primary {
-            background: #27ae60;
-            color: white;
-        }
-        
-        .install-btn:hover {
-            background: white;
-        }
-        
-        .install-btn.primary:hover {
-            background: #2ecc71;
-        }
-        
-        .close-btn {
-            background: transparent;
-            color: white;
-            padding: 5px 10px;
-        }
-        
-        @media (max-width: 768px) {
-            .install-content {
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
-            }
-        }
-    </style>
 </head>
 <body>
-    <!-- Banner de instalación PWA -->
-    <div id="installBanner" class="install-banner">
-        <div class="install-content">
-            <div class="install-text">
-                <h4>📱 ¡Instala la App!</h4>
-                <p>Úsala sin conexión y accede más rápido</p>
-            </div>
-            <div class="install-buttons">
-                <button id="installBtn" class="install-btn primary">Instalar</button>
-                <button id="closeBanner" class="install-btn close-btn">✕</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- NUEVA NAVEGACIÓN MÓVIL -->
+    <!-- NAVEGACIÓN MÓVIL MINIMALISTA -->
     <nav class="main-nav">
         <div class="nav-container">
-            <a href="/" class="nav-brand">
-                Pensión UTM
-            </a>
+            <a href="/" class="nav-brand">Pensión UTM</a>
             
             <ul class="nav-menu">
                 <li class="nav-item">
@@ -169,117 +62,78 @@
     <!-- CONTENIDO PRINCIPAL -->
     <main class="main-content">
         <div class="container">
-            <!-- Bienvenida -->
+            <!-- Bienvenida simplificada -->
             <div class="card fade-in">
                 <div class="card-header">
-                    ¡Bienvenido a tu App de Pensión Alimenticia!
+                    💰 Pensión Alimenticia UTM
                 </div>
                 <div class="card-body">
-                    <p>Gestiona fácilmente tus pagos basados en UTM (3.51360 UTM)</p>
+                    <p>Gestiona tus pagos basados en UTM oficial</p>
                     
-                    <!-- Estado de la app -->
-                    <div id="appStatus" style="margin-top: 20px;">
-                        <small id="statusText">🔄 Verificando estado de la app...</small>
+                    <!-- Estado de conexión minimalista -->
+                    <div style="margin-top: 1rem;">
+                        <div id="connectionStatus" class="connection-status">
+                            <div id="statusDot" class="status-dot status-offline"></div>
+                            <span id="statusText">Verificando...</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Instrucciones de instalación móvil -->
-            <div id="mobileInstructions" class="card" style="display: none;">
-                <div class="card-header">
-                    📱 Cómo instalar en tu dispositivo
-                </div>
-                <div class="card-body">
-                    <div id="androidInstructions" class="android">
-                        <p><strong>En Android (Chrome):</strong></p>
-                        <p>1. Toca el menú (⋮) arriba a la derecha</p>
-                        <p>2. Selecciona "Instalar app" o "Agregar a pantalla de inicio"</p>
-                        <p>3. Confirma la instalación</p>
-                    </div>
-                    <div id="iosInstructions" class="ios">
-                        <p><strong>En iPhone (Safari):</strong></p>
-                        <p>1. Toca el botón de compartir (📤) abajo</p>
-                        <p>2. Selecciona "Añadir a pantalla de inicio"</p>
-                        <p>3. Confirma el nombre y toca "Añadir"</p>
-                    </div>
-                    <button onclick="mostrarInstruccionesEspecificas()" class="btn btn-primary" style="margin-top: 10px;">
-                        📋 Ver instrucciones específicas
-                    </button>
-                </div>
-            </div>
-
-            <!-- Tarjetas de acceso rápido -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 20px 0;">
-                <!-- Calculadora UTM -->
+            <!-- Navegación principal con 3 opciones principales -->
+            <div class="nav-grid">
                 <div class="card slide-up">
-                    <div class="card-header">
-                        🧮 Calculadora UTM
-                    </div>
+                    <div class="card-header">🧮 Calcular</div>
                     <div class="card-body">
-                        <p>Calcula cuánto debes pagar este mes basado en el valor actual de la UTM.</p>
+                        <p>Calcula el monto mensual según UTM oficial</p>
                         <a href="/calculadora.html" class="btn btn-primary">Calcular Ahora</a>
                     </div>
                 </div>
 
-                <!-- Registrar Pago -->
                 <div class="card slide-up">
-                    <div class="card-header">
-                        💳 Registrar Pago
-                    </div>
+                    <div class="card-header">💳 Registrar</div>
                     <div class="card-body">
-                        <p>Anota los pagos que has realizado para llevar un control exacto.</p>
+                        <p>Anota los pagos realizados</p>
                         <a href="/pagos.html" class="btn btn-success">Agregar Pago</a>
                     </div>
                 </div>
 
-                <!-- Ver Historial -->
                 <div class="card slide-up">
-                    <div class="card-header">
-                        📊 Ver Historial
-                    </div>
+                    <div class="card-header">📊 Historial</div>
                     <div class="card-body">
-                        <p>Consulta todos tus pagos anteriores y el estado de cada mes.</p>
+                        <p>Consulta pagos anteriores</p>
                         <a href="/historial.html" class="btn btn-primary">Ver Historial</a>
                     </div>
                 </div>
             </div>
 
-            <!-- Resumen rápido -->
+            <!-- Resumen compacto -->
             <div class="card slide-up">
-                <div class="card-header">
-                    📋 Resumen Rápido
-                </div>
+                <div class="card-header">📋 Resumen</div>
                 <div class="card-body">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);" id="totalPagos">0</div>
-                            <div style="font-size: 0.9rem; color: #666;">Pagos Registrados</div>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="summary-number" id="totalPagos">0</div>
+                            <div class="summary-label">Pagos</div>
                         </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 2rem; font-weight: bold; color: var(--success-color);" id="montoTotal">$0</div>
-                            <div style="font-size: 0.9rem; color: #666;">Total Pagado</div>
+                        <div class="summary-item">
+                            <div class="summary-number" id="montoTotal">$0</div>
+                            <div class="summary-label">Total</div>
                         </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 2rem; font-weight: bold; color: var(--secondary-color);" id="ultimoPago">-</div>
-                            <div style="font-size: 0.9rem; color: #666;">Último Pago</div>
+                        <div class="summary-item">
+                            <div class="summary-number" id="ultimoPago">-</div>
+                            <div class="summary-label">Último</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Información importante -->
+            <!-- Información esencial -->
             <div class="card">
-                <div class="card-header">
-                    ℹ️ Información Importante
-                </div>
+                <div class="card-header">ℹ️ Factor UTM</div>
                 <div class="card-body">
-                    <ul>
-                        <li><strong>Monto base:</strong> 3.51360 UTM</li>
-                        <li><strong>Equivalencia inicial:</strong> $240.000 (cuando se fijó)</li>
-                        <li><strong>Actualización:</strong> El monto cambia según el valor UTM mensual</li>
-                        <li><strong>Consulta UTM:</strong> Valores oficiales desde API confiable</li>
-                        <li><strong>Offline:</strong> La app funciona sin internet</li>
-                    </ul>
+                    <p><strong>Monto fijo:</strong> 3.51360 UTM</p>
+                    <p><strong>Se actualiza:</strong> Según valor UTM mensual oficial</p>
                 </div>
             </div>
         </div>
@@ -288,34 +142,20 @@
     <!-- JavaScript -->
     <script src="/js/app.js"></script>
     <script>
-        // Variables para PWA
-        let deferredPrompt;
-        let isIOS = false;
-        let isAndroid = false;
-        
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🏠 Página de inicio con navegación móvil mejorada');
+            console.log('🏠 Inicio - Diseño minimalista cargado');
             
             // Marcar navegación activa
             setActiveNavItem();
             
-            // Detectar dispositivo
-            detectarDispositivo();
-            
             // Registrar Service Worker
             registrarServiceWorker();
             
-            // Configurar prompt de instalación
-            configurarInstallPrompt();
-            
-            // Cargar resumen rápido
+            // Cargar resumen
             cargarResumenRapido();
             
-            // Mostrar estado de la app
-            mostrarEstadoApp();
-            
-            // Mostrar banner de instalación después de 3 segundos
-            setTimeout(verificarYMostrarBannerInstalacion, 3000);
+            // Verificar estado de conexión
+            verificarEstadoConexion();
         });
 
         function setActiveNavItem() {
@@ -325,141 +165,32 @@
             document.getElementById('nav-home').classList.add('active');
         }
 
-        function detectarDispositivo() {
-            const userAgent = navigator.userAgent.toLowerCase();
-            isIOS = /iphone|ipad|ipod/.test(userAgent);
-            isAndroid = /android/.test(userAgent);
-            
-            console.log(`📱 Dispositivo detectado: iOS=${isIOS}, Android=${isAndroid}`);
-        }
-
-        function verificarYMostrarBannerInstalacion() {
-            // No mostrar si ya está instalado
-            if (window.matchMedia('(display-mode: standalone)').matches || 
-                window.navigator.standalone === true) {
-                console.log('📱 App ya instalada, no mostrar banner');
-                return;
-            }
-            
-            // No mostrar si es desktop
-            if (!isIOS && !isAndroid && window.innerWidth > 768) {
-                console.log('💻 Dispositivo desktop detectado');
-                return;
-            }
-            
-            // Mostrar banner de instalación
-            mostrarBannerInstalacion();
-        }
-
-        function mostrarBannerInstalacion() {
-            const banner = document.getElementById('installBanner');
-            const instructions = document.getElementById('mobileInstructions');
-            
-            banner.classList.add('show');
-            instructions.style.display = 'block';
-            
-            console.log('📱 Banner de instalación mostrado');
-        }
-
-        function ocultarBannerInstalacion() {
-            const banner = document.getElementById('installBanner');
-            banner.classList.remove('show');
-        }
-
-        function mostrarInstruccionesEspecificas() {
-            const androidInst = document.getElementById('androidInstructions');
-            const iosInst = document.getElementById('iosInstructions');
-            
-            if (isAndroid) {
-                androidInst.style.display = 'block';
-                iosInst.style.display = 'none';
-            } else if (isIOS) {
-                androidInst.style.display = 'none';
-                iosInst.style.display = 'block';
-            } else {
-                androidInst.style.display = 'block';
-                iosInst.style.display = 'block';
-            }
-        }
-
-        // Registrar Service Worker
         async function registrarServiceWorker() {
             if ('serviceWorker' in navigator) {
                 try {
-                    const registration = await navigator.serviceWorker.register('/sw.js');
-                    console.log('✅ Service Worker registrado:', registration);
+                    await navigator.serviceWorker.register('/sw.js');
+                    console.log('✅ Service Worker registrado');
                 } catch (error) {
                     console.log('❌ Error registrando Service Worker:', error);
                 }
             }
         }
 
-        // Configurar prompt de instalación
-        function configurarInstallPrompt() {
-            // Listener para el prompt de instalación
-            window.addEventListener('beforeinstallprompt', (e) => {
-                console.log('📱 Prompt de instalación disponible');
-                e.preventDefault();
-                deferredPrompt = e;
-                mostrarBannerInstalacion();
-            });
-
-            // Listeners para botones
-            document.getElementById('installBtn').addEventListener('click', instalarApp);
-            document.getElementById('closeBanner').addEventListener('click', ocultarBannerInstalacion);
-            
-            // Listener para cuando se instala
-            window.addEventListener('appinstalled', () => {
-                console.log('✅ App instalada correctamente');
-                ocultarBannerInstalacion();
-                mostrarAlerta('✅ ¡App instalada correctamente en tu dispositivo!', 'success');
-                deferredPrompt = null;
-            });
-        }
-
-        async function instalarApp() {
-            if (deferredPrompt) {
-                console.log('📱 Mostrando prompt de instalación');
-                deferredPrompt.prompt();
-                const choiceResult = await deferredPrompt.userChoice;
-                
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('✅ Usuario aceptó instalar la app');
-                } else {
-                    console.log('❌ Usuario rechazó instalar la app');
-                }
-                
-                deferredPrompt = null;
-                ocultarBannerInstalacion();
-            } else {
-                console.log('📱 Mostrando instrucciones manuales');
-                mostrarInstruccionesEspecificas();
-                
-                if (isIOS) {
-                    alert('📱 En Safari: Toca el botón Compartir (📤) y selecciona "Añadir a pantalla de inicio"');
-                } else {
-                    alert('📱 En Chrome: Toca el menú (⋮) y selecciona "Instalar app" o "Agregar a pantalla de inicio"');
-                }
-            }
-        }
-
-        function mostrarEstadoApp() {
+        async function verificarEstadoConexion() {
+            const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
             
-            if ('serviceWorker' in navigator) {
-                if (navigator.onLine) {
-                    statusText.innerHTML = '🟢 App funcionando - Conectado a internet';
+            try {
+                if (typeof UTMAPI !== 'undefined') {
+                    await UTMAPI.obtenerUTMActual();
+                    statusDot.className = 'status-dot status-online';
+                    statusText.textContent = 'Online';
                 } else {
-                    statusText.innerHTML = '🟡 App funcionando - Modo offline';
+                    throw new Error('API no disponible');
                 }
-            } else {
-                statusText.innerHTML = '⚪ App funcionando - Navegador básico';
-            }
-            
-            // Verificar si está instalada como PWA
-            if (window.matchMedia('(display-mode: standalone)').matches || 
-                window.navigator.standalone === true) {
-                statusText.innerHTML += ' | 📱 Instalada como app';
+            } catch (error) {
+                statusDot.className = 'status-dot status-offline';
+                statusText.textContent = 'Offline';
             }
         }
 
@@ -477,7 +208,10 @@
                     
                     if (pagos.length > 0) {
                         const pagoReciente = pagos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
-                        ultimoPago = new Date(pagoReciente.fecha).toLocaleDateString('es-CL');
+                        ultimoPago = new Date(pagoReciente.fecha).toLocaleDateString('es-CL', {
+                            day: '2-digit',
+                            month: '2-digit'
+                        });
                     }
                 }
                 
@@ -485,57 +219,27 @@
                 document.getElementById('montoTotal').textContent = formatearPesos(montoTotal);
                 document.getElementById('ultimoPago').textContent = ultimoPago;
                 
-                console.log('✅ Resumen rápido cargado');
             } catch (error) {
                 console.error('❌ Error cargando resumen:', error);
             }
         }
 
         function formatearPesos(cantidad) {
+            if (cantidad === 0) return '$0';
+            
             return new Intl.NumberFormat('es-CL', {
                 style: 'currency',
                 currency: 'CLP',
-                minimumFractionDigits: 0
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
             }).format(cantidad);
         }
 
-        function mostrarAlerta(mensaje, tipo = 'info') {
-            const alertaExistente = document.querySelector('.alert');
-            if (alertaExistente) {
-                alertaExistente.remove();
-            }
-            
-            const alerta = document.createElement('div');
-            alerta.className = `alert alert-${tipo}`;
-            alerta.textContent = mensaje;
-            alerta.style.cssText = `
-                padding: 12px 20px;
-                margin: 10px 0;
-                border-radius: 8px;
-                background: ${tipo === 'success' ? '#27ae60' : '#3498db'};
-                color: white;
-                font-weight: 500;
-            `;
-            
-            const container = document.querySelector('.container');
-            container.insertBefore(alerta, container.firstChild);
-            
-            setTimeout(() => {
-                if (alerta.parentNode) {
-                    alerta.remove();
-                }
-            }, 5000);
-        }
-
         // Listeners para estado de conexión
-        window.addEventListener('online', () => {
-            mostrarEstadoApp();
-            mostrarAlerta('🟢 Conexión restaurada', 'success');
-        });
-
+        window.addEventListener('online', verificarEstadoConexion);
         window.addEventListener('offline', () => {
-            mostrarEstadoApp();
-            mostrarAlerta('🟡 Sin conexión - Funcionando offline', 'info');
+            document.getElementById('statusDot').className = 'status-dot status-offline';
+            document.getElementById('statusText').textContent = 'Offline';
         });
     </script>
 </body>

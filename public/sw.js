@@ -1,6 +1,6 @@
 // sw.js - Service Worker optimizado para archivos específicos
 
-const CACHE_NAME = 'pension-app-v2.0';
+const CACHE_NAME = 'pension-app-v2.1';
 const urlsToCache = [
   '/',
   '/css/styles.css',
