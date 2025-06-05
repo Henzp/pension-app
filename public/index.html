@@ -177,11 +177,13 @@
             // Cargar resumen
             cargarResumenRapido();
             
-            // Verificar estado de conexión
-            verificarEstadoConexion();
-            
             // Verificar si es la primera vez que usa la app
             verificarPrimeraVez();
+            
+            // Verificar estado de conexión AL FINAL (después de que todo esté listo)
+            setTimeout(() => {
+                verificarEstadoConexion();
+            }, 1000); // Esperar 1 segundo para que utm-api.js esté completamente cargado
         });
 
         function setActiveNavItem() {
@@ -206,18 +208,37 @@
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
             
-            try {
-                if (typeof UTMAPI !== 'undefined') {
-                    await UTMAPI.obtenerUTMActual();
-                    statusDot.className = 'status-dot status-online';
-                    statusText.textContent = 'Online';
-                } else {
-                    throw new Error('API no disponible');
+            // Esperar a que UTMAPI esté disponible
+            let intentos = 0;
+            const maxIntentos = 10;
+            
+            const esperarUTMAPI = async () => {
+                while (intentos < maxIntentos) {
+                    if (typeof window.UTMAPI !== 'undefined') {
+                        try {
+                            console.log('🔄 Verificando estado de conexión...');
+                            await window.UTMAPI.obtenerUTMActual();
+                            statusDot.className = 'status-dot status-online';
+                            statusText.textContent = 'Online';
+                            console.log('✅ Estado actualizado: Online');
+                            return;
+                        } catch (error) {
+                            console.warn('⚠️ Error verificando conexión:', error);
+                            break;
+                        }
+                    }
+                    
+                    intentos++;
+                    await new Promise(resolve => setTimeout(resolve, 100)); // Esperar 100ms
                 }
-            } catch (error) {
+                
+                // Si llegamos aquí, mostrar offline
                 statusDot.className = 'status-dot status-offline';
                 statusText.textContent = 'Offline';
-            }
+                console.log('❌ Estado actualizado: Offline');
+            };
+            
+            await esperarUTMAPI();
         }
 
         function cargarResumenRapido() {
@@ -287,7 +308,10 @@
         }
 
         // Listeners para estado de conexión
-        window.addEventListener('online', verificarEstadoConexion);
+        window.addEventListener('online', () => {
+            setTimeout(verificarEstadoConexion, 500); // Verificar después de 500ms
+        });
+        
         window.addEventListener('offline', () => {
             document.getElementById('statusDot').className = 'status-dot status-offline';
             document.getElementById('statusText').textContent = 'Offline';
