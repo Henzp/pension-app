@@ -80,6 +80,21 @@
                 </div>
             </div>
 
+            <!-- ADVERTENCIA IMPORTANTE SOBRE DATOS -->
+            <div class="card" style="border-left: 4px solid #f44336; background: rgba(244, 67, 54, 0.05);">
+                <div class="card-header">⚠️ Importante - Tus Datos</div>
+                <div class="card-body">
+                    <p>Tus datos se guardan <strong>solo en tu dispositivo</strong>.</p>
+                    <p>Si desinstalas la app o cambias de celular, se perderán.</p>
+                    
+                    <div style="margin-top: 1rem;">
+                        <a href="/backup.html" class="btn btn-primary">
+                            🛡️ Hacer Backup de Datos
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <!-- Navegación principal con 3 opciones principales -->
             <div class="nav-grid">
                 <div class="card slide-up">
@@ -125,6 +140,13 @@
                             <div class="summary-label">Último</div>
                         </div>
                     </div>
+                    
+                    <!-- Botón de backup en el resumen -->
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <a href="/backup.html" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.5rem 1rem;">
+                            🛡️ Backup
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -156,6 +178,9 @@
             
             // Verificar estado de conexión
             verificarEstadoConexion();
+            
+            // Verificar si es la primera vez que usa la app
+            verificarPrimeraVez();
         });
 
         function setActiveNavItem() {
@@ -221,6 +246,31 @@
                 
             } catch (error) {
                 console.error('❌ Error cargando resumen:', error);
+            }
+        }
+
+        function verificarPrimeraVez() {
+            // Verificar si es la primera vez que usa la app
+            const primeraVez = !localStorage.getItem('pension_pagos');
+            const yaSeAdvirtio = localStorage.getItem('pension_backup_warning_shown');
+            
+            if (primeraVez && !yaSeAdvirtio) {
+                // Mostrar advertencia después de 3 segundos
+                setTimeout(() => {
+                    const mostrarWarning = confirm(
+                        '🛡️ IMPORTANTE - Backup de Datos\n\n' +
+                        'Tus datos se guardan solo en tu dispositivo.\n\n' +
+                        'Si desinstalas la app o cambias de celular, se perderán.\n\n' +
+                        '¿Quieres ver cómo hacer backup de tus datos?'
+                    );
+                    
+                    if (mostrarWarning) {
+                        window.location.href = '/backup.html';
+                    }
+                    
+                    // Marcar que ya se mostró la advertencia
+                    localStorage.setItem('pension_backup_warning_shown', 'true');
+                }, 3000);
             }
         }
 

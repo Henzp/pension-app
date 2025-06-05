@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup de Datos - Pensión UTM</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/mobile-nav.css">
+</head>
+<body>
+    <!-- NAVEGACIÓN MÓVIL -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">Pensión UTM</a>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link" id="nav-home">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Inicio</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/calculadora.html" class="nav-link" id="nav-calc">
+                        <span class="nav-icon">🧮</span>
+                        <span class="nav-text">Calcular</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/pagos.html" class="nav-link" id="nav-pagos">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Pagos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/historial.html" class="nav-link" id="nav-historial">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Historial</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Título -->
+            <div class="card fade-in">
+                <div class="card-header">🛡️ Backup de Datos</div>
+                <div class="card-body">
+                    <p>Protege tu información exportando e importando datos</p>
+                </div>
+            </div>
+
+            <!-- Información importante -->
+            <div class="card">
+                <div class="card-header">⚠️ Información Importante</div>
+                <div class="card-body">
+                    <p><strong>¿Dónde se guardan mis datos?</strong></p>
+                    <p>Tus datos se almacenan <strong>localmente en tu dispositivo</strong>, no en internet.</p>
+                    
+                    <div style="margin: 1rem 0; padding: 1rem; background: rgba(244, 67, 54, 0.1); border-radius: 8px; border-left: 4px solid #f44336;">
+                        <p><strong>⚠️ IMPORTANTE:</strong></p>
+                        <p>• Si desinstalas la app = <strong>pierdes todos los datos</strong></p>
+                        <p>• Si cambias de celular = <strong>pierdes todos los datos</strong></p>
+                        <p>• Si limpias datos de la app = <strong>pierdes todos los datos</strong></p>
+                    </div>
+                    
+                    <p><strong>💡 Recomendación:</strong> Haz backup regularmente para no perder tu historial.</p>
+                </div>
+            </div>
+
+            <!-- Estadísticas actuales -->
+            <div class="card">
+                <div class="card-header">📊 Tus Datos Actuales</div>
+                <div class="card-body">
+                    <div id="backupStats">
+                        <p>Cargando estadísticas...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exportar datos -->
+            <div class="card">
+                <div class="card-header">📤 Exportar Datos (Descargar Backup)</div>
+                <div class="card-body">
+                    <p>Descarga un archivo con todos tus pagos y datos</p>
+                    
+                    <div style="margin: 1rem 0;">
+                        <button class="btn btn-success" onclick="exportarDatos()" style="width: 100%;">
+                            📤 Descargar Backup
+                        </button>
+                    </div>
+                    
+                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">
+                        <p><strong>¿Qué incluye?</strong></p>
+                        <p>• Todos tus pagos registrados</p>
+                        <p>• Valores UTM guardados</p>
+                        <p>• Fecha del backup</p>
+                        <p>• Estadísticas generales</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Importar datos -->
+            <div class="card">
+                <div class="card-header">📥 Importar Datos (Restaurar Backup)</div>
+                <div class="card-body">
+                    <p>Selecciona un archivo de backup para restaurar tus datos</p>
+                    
+                    <div style="margin: 1rem 0;">
+                        <input type="file" id="inputBackup" accept=".json" onchange="importarDatos(event)" style="display: none;">
+                        <button class="btn btn-primary" onclick="document.getElementById('inputBackup').click()" style="width: 100%;">
+                            📥 Seleccionar Archivo Backup
+                        </button>
+                    </div>
+                    
+                    <div style="margin: 1rem 0; padding: 1rem; background: rgba(244, 67, 54, 0.1); border-radius: 8px; border-left: 4px solid #f44336;">
+                        <p><strong>⚠️ ADVERTENCIA:</strong></p>
+                        <p>Importar datos <strong>reemplazará todos los datos actuales</strong>.</p>
+                        <p>Se hará un backup automático antes de importar.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instrucciones de uso -->
+            <div class="card">
+                <div class="card-header">📖 Cómo Usar el Backup</div>
+                <div class="card-body">
+                    <div style="margin-bottom: 1rem;">
+                        <p><strong>🔄 Backup Regular (Recomendado):</strong></p>
+                        <p>1. Exporta tus datos cada mes</p>
+                        <p>2. Guarda el archivo en Google Drive, WhatsApp o email</p>
+                        <p>3. Mantén varios backups por seguridad</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <p><strong>📱 Cambio de Celular:</strong></p>
+                        <p>1. Exporta datos del celular antiguo</p>
+                        <p>2. Instala la app en el celular nuevo</p>
+                        <p>3. Importa el archivo de backup</p>
+                    </div>
+                    
+                    <div>
+                        <p><strong>🔧 Solución de Problemas:</strong></p>
+                        <p>1. Si la app no funciona, desinstala y reinstala</p>
+                        <p>2. Importa tu último backup</p>
+                        <p>3. Todos tus datos estarán de vuelta</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones adicionales -->
+            <div class="card">
+                <div class="card-header">🔧 Otras Opciones</div>
+                <div class="card-body">
+                    <div style="display: grid; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="compartirDatos()">
+                            📱 Enviar Backup por WhatsApp
+                        </button>
+                        
+                        <button class="btn btn-primary" onclick="enviarPorEmail()">
+                            📧 Enviar Backup por Email
+                        </button>
+                        
+                        <button class="btn btn-danger" onclick="confirmarLimpiarDatos()">
+                            🗑️ Eliminar Todos los Datos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="/js/app.js"></script>
+    <script src="/js/backup-system.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🛡️ Página de backup cargada');
+            
+            // No marcar navegación activa ya que esta página no está en el menú principal
+            
+            // Inicializar sistema de backup
+            if (window.BackupSystem) {
+                BackupSystem.inicializarSistemaBackup();
+            }
+        });
+
+        // FUNCIÓN PARA COMPARTIR BACKUP
+        async function compartirDatos() {
+            try {
+                // Primero exportar datos
+                const pagos = localStorage.getItem('pension_pagos');
+                if (!pagos || JSON.parse(pagos).length === 0) {
+                    mostrarAlerta('❌ No hay datos para compartir', 'danger');
+                    return;
+                }
+
+                // Crear backup
+                const backup = {
+                    version: '2.1',
+                    fechaBackup: new Date().toISOString(),
+                    datos: {
+                        pagos: JSON.parse(pagos || '[]')
+                    }
+                };
+
+                const jsonString = JSON.stringify(backup, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const file = new File([blob], `pension-backup-${new Date().toISOString().slice(0,10)}.json`, { type: 'application/json' });
+
+                // Usar Web Share API si está disponible
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: 'Backup Pensión UTM',
+                        text: 'Mi backup de pagos de pensión alimenticia',
+                        files: [file]
+                    });
+                    mostrarAlerta('✅ Backup compartido', 'success');
+                } else {
+                    // Fallback: descargar archivo
+                    exportarDatos();
+                    mostrarAlerta('📱 Archivo descargado. Compártelo desde tu galería/descargas', 'info');
+                }
+            } catch (error) {
+                console.error('❌ Error compartiendo:', error);
+                mostrarAlerta('❌ Error al compartir. Usa "Descargar Backup"', 'danger');
+            }
+        }
+
+        // FUNCIÓN PARA ENVIAR POR EMAIL
+        function enviarPorEmail() {
+            try {
+                const stats = window.BackupSystem ? BackupSystem.obtenerEstadisticasBackup() : null;
+                
+                const subject = encodeURIComponent('Backup - Pensión Alimenticia UTM');
+                const body = encodeURIComponent(`Hola,
+
+Te envío mi backup de datos de la app Pensión UTM.
+
+${stats ? `
+Resumen de datos:
+- Total pagos: ${stats.totalPagos}
+- Monto total: ${formatearPesos(stats.montoTotal)}
+- Período: ${stats.rangoFechas}
+` : ''}
+
+Para restaurar estos datos:
+1. Instala la app Pensión UTM
+2. Ve a la sección de Backup
+3. Importa este archivo
+
+Saludos`);
+
+                const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
+                
+                // Primero descargar el backup
+                exportarDatos();
+                
+                // Luego abrir cliente de email
+                setTimeout(() => {
+                    window.location.href = mailtoLink;
+                    mostrarAlerta('📧 Archivo descargado. Se abrió tu cliente de email', 'info');
+                }, 1000);
+                
+            } catch (error) {
+                console.error('❌ Error preparando email:', error);
+                mostrarAlerta('❌ Error. Usa "Descargar Backup" manualmente', 'danger');
+            }
+        }
+
+        // FUNCIÓN PARA CONFIRMAR LIMPIEZA DE DATOS
+        function confirmarLimpiarDatos() {
+            const stats = window.BackupSystem ? BackupSystem.obtenerEstadisticasBackup() : null;
+            
+            let mensaje = '⚠️ ¿ELIMINAR TODOS LOS DATOS?\n\n';
+            
+            if (stats) {
+                mensaje += `Esto eliminará:\n• ${stats.totalPagos} pagos\n• ${formatearPesos(stats.montoTotal)} en historial\n\n`;
+            }
+            
+            mensaje += '⚠️ ESTA ACCIÓN NO SE PUEDE DESHACER\n\n¿Estás seguro?';
+            
+            if (confirm(mensaje)) {
+                const confirmarFinal = confirm('🚨 ÚLTIMA CONFIRMACIÓN\n\n¿Realmente quieres eliminar todos los datos?\n\nEsta acción es IRREVERSIBLE.');
+                
+                if (confirmarFinal) {
+                    limpiarTodosLosDatos();
+                }
+            }
+        }
+
+        // FUNCIÓN PARA LIMPIAR TODOS LOS DATOS
+        function limpiarTodosLosDatos() {
+            try {
+                // Hacer backup antes de eliminar
+                const fechaBackup = new Date().toISOString();
+                const pagosActuales = localStorage.getItem('pension_pagos');
+                
+                if (pagosActuales) {
+                    localStorage.setItem(`pension_backup_eliminado_${fechaBackup}`, pagosActuales);
+                }
+                
+                // Eliminar datos principales
+                localStorage.removeItem('pension_pagos');
+                localStorage.removeItem('pension_utm');
+                
+                mostrarAlerta('✅ Todos los datos han sido eliminados', 'success');
+                
+                // Recargar página después de 2 segundos
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('❌ Error eliminando datos:', error);
+                mostrarAlerta('❌ Error al eliminar datos', 'danger');
+            }
+        }
+
+        // FUNCIÓN AUXILIAR PARA FORMATEAR PESOS
+        function formatearPesos(cantidad) {
+            return new Intl.NumberFormat('es-CL', {
+                style: 'currency',
+                currency: 'CLP',
+                minimumFractionDigits: 0
+            }).format(cantidad);
+        }
+
+        // FUNCIÓN AUXILIAR PARA MOSTRAR ALERTAS
+        function mostrarAlerta(mensaje, tipo = 'info') {
+            const alertaExistente = document.querySelector('.alert');
+            if (alertaExistente) {
+                alertaExistente.remove();
+            }
+            
+            const alerta = document.createElement('div');
+            alerta.className = `alert alert-${tipo}`;
+            alerta.textContent = mensaje;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(alerta, container.firstChild);
+            
+            setTimeout(() => {
+                if (alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
