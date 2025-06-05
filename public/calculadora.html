@@ -74,18 +74,15 @@
                             </small>
                         </div>
 
+                        <!-- OPCIÓN 4: Botón integrado al input -->
                         <div class="form-group">
                             <label for="valorUTM">Valor UTM del mes (pesos):</label>
-                            
-                            <!-- BOTÓN ARREGLADO CON MEJOR CSS -->
-                            <div class="input-button-group">
+                            <div class="input-with-button">
                                 <input type="number" id="valorUTM" class="form-control" placeholder="68310" required readonly>
-                                <button type="button" class="btn btn-primary btn-responsive btn-compact" onclick="obtenerUTMDelMes()">
-                                    <span>📡</span>
-                                    <span class="hide-on-small">Obtener</span>
+                                <button type="button" id="btnObtenerUTM" onclick="obtenerUTMDelMes()" title="Obtener UTM oficial">
+                                    📡
                                 </button>
                             </div>
-                            
                             <small id="fuenteUTM" style="color: rgba(255,255,255,0.7); font-size: 0.8rem; margin-top: 0.5rem; display: block;"></small>
                         </div>
 
@@ -131,23 +128,48 @@
         </div>
     </main>
 
-    <!-- CSS adicional para ocultar texto en pantallas muy pequeñas -->
+    <!-- CSS para el botón integrado -->
     <style>
-        @media (max-width: 400px) {
-            .hide-on-small {
-                display: none;
-            }
-            
-            .btn-compact {
-                min-width: 50px !important;
-                padding: 0.75rem 0.5rem !important;
-            }
+        .input-with-button {
+            position: relative;
         }
         
-        @media (min-width: 401px) {
-            .hide-on-small {
-                display: inline;
-            }
+        .input-with-button input {
+            padding-right: 50px;
+        }
+        
+        .input-with-button button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #3f51b5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            width: 40px;
+            height: 34px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .input-with-button button:hover {
+            background: #303f9f;
+            transform: translateY(-50%) scale(1.05);
+        }
+        
+        .input-with-button button:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        
+        .input-with-button button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: translateY(-50%) scale(1);
         }
     </style>
 
@@ -155,31 +177,20 @@
     <script src="/js/app.js"></script>
     <script src="/js/utm-api.js"></script>
     <script>
+        // [Mismo JavaScript que antes, sin cambios]
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🧮 Calculadora simplificada cargada');
-            
-            // Marcar navegación activa
+            console.log('🧮 Calculadora con botón integrado');
             setActiveNavItem();
-            
-            // Establecer mes actual
             const mesActual = new Date().toISOString().slice(0, 7);
             document.getElementById('mesCalculo').value = mesActual;
-            
-            // Actualizar información del mes
             actualizarMesSeleccionado();
-            
-            // Verificar conexión
             verificarEstadoConexion();
-            
-            // Obtener UTM del mes actual automáticamente
             obtenerUTMDelMes();
             
-            // Listeners
             document.getElementById('mesCalculo').addEventListener('change', function() {
                 actualizarMesSeleccionado();
-                // Limpiar UTM cuando cambia el mes
                 document.getElementById('valorUTM').value = '';
-                document.getElementById('fuenteUTM').textContent = 'Selecciona "Obtener UTM" para el nuevo mes';
+                document.getElementById('fuenteUTM').textContent = 'Toca 📡 para obtener UTM del nuevo mes';
                 document.getElementById('resultadoCalculo').style.display = 'none';
             });
             
@@ -190,16 +201,13 @@
         });
 
         function setActiveNavItem() {
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             document.getElementById('nav-calc').classList.add('active');
         }
 
         async function verificarEstadoConexion() {
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
-            
             try {
                 if (typeof UTMAPI !== 'undefined') {
                     await UTMAPI.obtenerUTMActual();
@@ -217,7 +225,6 @@
         function actualizarMesSeleccionado() {
             const mesInput = document.getElementById('mesCalculo');
             const mesValue = mesInput.value;
-            
             if (mesValue) {
                 const mesFormateado = formatearMes(mesValue);
                 document.getElementById('mesSeleccionado').textContent = mesFormateado;
@@ -225,17 +232,14 @@
         }
 
         async function obtenerUTMDelMes() {
-            const btn = event?.target;
-            const textOriginal = btn?.innerHTML;
+            const btn = document.getElementById('btnObtenerUTM');
+            const textOriginal = btn.innerHTML;
             
             try {
-                if (btn) {
-                    btn.innerHTML = '<span>🔄</span><span class="hide-on-small">Cargando</span>';
-                    btn.disabled = true;
-                }
+                btn.innerHTML = '🔄';
+                btn.disabled = true;
                 
                 const mesSeleccionado = document.getElementById('mesCalculo').value;
-                
                 if (!mesSeleccionado) {
                     mostrarAlerta('❌ Selecciona un mes primero', 'danger');
                     return;
@@ -245,25 +249,19 @@
                     throw new Error('API UTM no disponible');
                 }
                 
-                // Obtener UTM específica del mes seleccionado
                 const utm = await UTMAPI.obtenerUTMPorMes(mesSeleccionado);
-                
                 document.getElementById('valorUTM').value = Math.round(utm);
                 document.getElementById('fuenteUTM').textContent = `✅ UTM oficial para ${formatearMes(mesSeleccionado)}`;
-                
                 mostrarAlerta(`✅ UTM obtenida: $${Math.round(utm).toLocaleString('es-CL')}`, 'success');
                 
             } catch (error) {
                 console.error('❌ Error obteniendo UTM:', error);
                 mostrarAlerta('❌ Error obteniendo UTM. Ingresa manualmente.', 'danger');
                 document.getElementById('fuenteUTM').textContent = 'Error - Ingresa valor manualmente';
-                // Permitir edición manual
                 document.getElementById('valorUTM').readOnly = false;
             } finally {
-                if (btn) {
-                    btn.innerHTML = textOriginal;
-                    btn.disabled = false;
-                }
+                btn.innerHTML = textOriginal;
+                btn.disabled = false;
             }
         }
 
@@ -271,7 +269,6 @@
             try {
                 const mesInput = document.getElementById('mesCalculo');
                 const valorUTMInput = document.getElementById('valorUTM');
-                
                 const mes = mesInput.value;
                 const valorUTM = parseFloat(valorUTMInput.value);
                 
@@ -283,7 +280,6 @@
                 const factorUTM = 3.51360;
                 const montoCalculado = Math.round(valorUTM * factorUTM);
                 
-                // Mostrar resultado
                 document.getElementById('mesCalculado').textContent = formatearMes(mes).split(' ')[0];
                 document.getElementById('utmUsada').textContent = formatearPesos(valorUTM);
                 document.getElementById('montoCalculado').textContent = formatearPesos(montoCalculado);
@@ -299,29 +295,19 @@
         }
 
         function formatearPesos(cantidad) {
-            return new Intl.NumberFormat('es-CL', {
-                style: 'currency',
-                currency: 'CLP',
-                minimumFractionDigits: 0
-            }).format(cantidad);
+            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(cantidad);
         }
 
         function formatearMes(mesAno) {
             if (!mesAno) return '-';
-            
             const [ano, mes] = mesAno.split('-');
             const fecha = new Date(ano, mes - 1);
-            return fecha.toLocaleDateString('es-CL', { 
-                year: 'numeric', 
-                month: 'long' 
-            });
+            return fecha.toLocaleDateString('es-CL', { year: 'numeric', month: 'long' });
         }
 
         function mostrarAlerta(mensaje, tipo = 'info') {
             const alertaExistente = document.querySelector('.alert');
-            if (alertaExistente) {
-                alertaExistente.remove();
-            }
+            if (alertaExistente) alertaExistente.remove();
             
             const alerta = document.createElement('div');
             alerta.className = `alert alert-${tipo}`;
@@ -330,11 +316,7 @@
             const container = document.querySelector('.container');
             container.insertBefore(alerta, container.firstChild);
             
-            setTimeout(() => {
-                if (alerta.parentNode) {
-                    alerta.remove();
-                }
-            }, 4000);
+            setTimeout(() => { if (alerta.parentNode) alerta.remove(); }, 4000);
         }
     </script>
 </body>
