@@ -78,7 +78,7 @@
                         <div class="form-group">
                             <label for="valorUTM">Valor UTM del mes (pesos):</label>
                             <div class="input-with-button">
-                                <input type="number" id="valorUTM" class="form-control" placeholder="68310" required readonly>
+                                <input type="number" id="valorUTM" class="form-control" placeholder="68785" required readonly>
                                 <button type="button" id="btnObtenerUTM" onclick="obtenerUTMDelMes()" title="Obtener UTM oficial">
                                     📡
                                 </button>
@@ -121,8 +121,14 @@
             <div class="card">
                 <div class="card-header">ℹ️ Factor UTM</div>
                 <div class="card-body">
-                    <p><strong>Fórmula:</strong> UTM del mes × 3.51360</p>
-                    <p><strong>Fuente:</strong> <a href="https://mindicador.cl" target="_blank" style="color: #3f51b5;">API oficial SII</a></p>
+                    <p><strong>Fórmula:</strong> <span id="factorDisplay">UTM del mes × 3.51360</span></p>
+                    <p><strong>Fuente:</strong> <a href="https://mindicador.cl" target="_blank" style="color: #3f51b5;">API oficial + valores locales</a></p>
+                    
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <a href="/configuracion.html" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.5rem 1rem;">
+                            ⚙️ Configurar Factor
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -173,20 +179,44 @@
         }
     </style>
 
-    <!-- JavaScript -->
+    <!-- JavaScript - ORDEN CORREGIDO -->
     <script src="/js/app.js"></script>
     <script src="/js/utm-api.js"></script>
     <script>
-        // [Mismo JavaScript que antes, sin cambios]
+        // VARIABLES GLOBALES
+        let sistemaUTMListo = false;
+
+        // FUNCIÓN DE INICIALIZACIÓN PRINCIPAL
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🧮 Calculadora con botón integrado');
+            console.log('🧮 Inicializando calculadora...');
+            
+            // Inicializar componentes básicos inmediatamente
+            inicializarComponentesBasicos();
+            
+            // Esperar a que el sistema UTM esté listo
+            esperarSistemaUTM().then(() => {
+                console.log('✅ Sistema UTM listo, inicializando funcionalidades');
+                inicializarFuncionalidadesUTM();
+            }).catch(error => {
+                console.error('❌ Error esperando sistema UTM:', error);
+                mostrarAlerta('⚠️ Sistema iniciado con valores locales', 'warning');
+                inicializarFuncionalidadesUTM(); // Continuar de todos modos
+            });
+        });
+
+        // INICIALIZAR COMPONENTES QUE NO DEPENDEN DE UTM
+        function inicializarComponentesBasicos() {
+            console.log('🔧 Inicializando componentes básicos...');
+            
+            // Marcar navegación activa
             setActiveNavItem();
+            
+            // Configurar fecha actual
             const mesActual = new Date().toISOString().slice(0, 7);
             document.getElementById('mesCalculo').value = mesActual;
             actualizarMesSeleccionado();
-            verificarEstadoConexion();
-            obtenerUTMDelMes();
             
+            // Event listeners
             document.getElementById('mesCalculo').addEventListener('change', function() {
                 actualizarMesSeleccionado();
                 document.getElementById('valorUTM').value = '';
@@ -198,28 +228,48 @@
                 e.preventDefault();
                 calcularPension();
             });
-        });
 
+            // Cargar factor personalizado si existe
+            cargarFactorPersonalizado();
+        }
+
+        // ESPERAR A QUE EL SISTEMA UTM ESTÉ DISPONIBLE
+        async function esperarSistemaUTM() {
+            console.log('⏳ Esperando que el sistema UTM esté disponible...');
+            
+            let intentos = 0;
+            const maxIntentos = 30; // 3 segundos máximo
+            
+            while (intentos < maxIntentos) {
+                if (typeof window.obtenerUTMPorMes === 'function' && 
+                    typeof window.UTMAPI === 'object') {
+                    console.log('✅ Sistema UTM disponible');
+                    sistemaUTMListo = true;
+                    return true;
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 100)); // Esperar 100ms
+                intentos++;
+            }
+            
+            throw new Error('Timeout esperando sistema UTM');
+        }
+
+        // INICIALIZAR FUNCIONALIDADES QUE DEPENDEN DE UTM
+        async function inicializarFuncionalidadesUTM() {
+            console.log('🔄 Inicializando funcionalidades UTM...');
+            
+            // Verificar estado de conexión
+            await verificarEstadoConexion();
+            
+            // Obtener UTM del mes actual automáticamente
+            await obtenerUTMDelMes();
+        }
+
+        // FUNCIONES AUXILIARES
         function setActiveNavItem() {
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             document.getElementById('nav-calc').classList.add('active');
-        }
-
-        async function verificarEstadoConexion() {
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('statusText');
-            try {
-                if (typeof UTMAPI !== 'undefined') {
-                    await UTMAPI.obtenerUTMActual();
-                    statusDot.className = 'status-dot status-online';
-                    statusText.textContent = 'Online';
-                } else {
-                    throw new Error('API no disponible');
-                }
-            } catch (error) {
-                statusDot.className = 'status-dot status-offline';
-                statusText.textContent = 'Offline';
-            }
         }
 
         function actualizarMesSeleccionado() {
@@ -231,11 +281,64 @@
             }
         }
 
+        function cargarFactorPersonalizado() {
+            try {
+                const factor = localStorage.getItem('pension_factor_utm');
+                if (factor && parseFloat(factor) !== 3.51360) {
+                    const factorNum = parseFloat(factor);
+                    document.getElementById('factorDisplay').textContent = `UTM del mes × ${factorNum}`;
+                    document.getElementById('factorDisplay').style.color = '#ffc107';
+                    document.getElementById('factorDisplay').style.fontWeight = 'bold';
+                }
+            } catch (error) {
+                console.log('No hay factor personalizado');
+            }
+        }
+
+        // VERIFICAR ESTADO DE CONEXIÓN
+        async function verificarEstadoConexion() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            
+            try {
+                if (!sistemaUTMListo) {
+                    throw new Error('Sistema UTM no está listo');
+                }
+                
+                // Intentar obtener UTM para verificar conexión
+                console.log('🔄 Verificando conexión...');
+                const utm = await window.obtenerUTMActual();
+                
+                if (utm && utm > 0) {
+                    statusDot.className = 'status-dot status-online';
+                    statusText.textContent = 'Online';
+                    console.log('✅ Estado: Online');
+                } else {
+                    throw new Error('UTM inválida');
+                }
+                
+            } catch (error) {
+                console.warn('⚠️ Error verificando conexión:', error);
+                statusDot.className = 'status-dot status-offline';
+                statusText.textContent = 'Offline';
+            }
+        }
+
+        // OBTENER UTM DEL MES - FUNCIÓN PRINCIPAL CORREGIDA
         async function obtenerUTMDelMes() {
             const btn = document.getElementById('btnObtenerUTM');
             const textOriginal = btn.innerHTML;
             
             try {
+                console.log('🔄 Iniciando obtención de UTM...');
+                
+                // Validar que el sistema esté listo
+                if (!sistemaUTMListo) {
+                    console.log('⏳ Sistema UTM no está listo, esperando...');
+                    await esperarSistemaUTM();
+                }
+                
+                // UI feedback
                 btn.innerHTML = '🔄';
                 btn.disabled = true;
                 
@@ -245,26 +348,47 @@
                     return;
                 }
                 
-                if (typeof UTMAPI === 'undefined') {
-                    throw new Error('API UTM no disponible');
+                console.log(`📅 Obteniendo UTM para: ${mesSeleccionado}`);
+                
+                // LLAMADA CORREGIDA - Usar función global en lugar de UTMAPI directamente
+                let utm;
+                
+                if (typeof window.obtenerUTMPorMes === 'function') {
+                    console.log('✅ Usando función global obtenerUTMPorMes');
+                    utm = await window.obtenerUTMPorMes(mesSeleccionado);
+                } else {
+                    throw new Error('Función obtenerUTMPorMes no disponible');
                 }
                 
-                const utm = await UTMAPI.obtenerUTMPorMes(mesSeleccionado);
+                // Validar resultado
+                if (!utm || isNaN(utm) || utm <= 0) {
+                    throw new Error(`UTM inválida recibida: ${utm}`);
+                }
+                
+                // Actualizar UI
                 document.getElementById('valorUTM').value = Math.round(utm);
                 document.getElementById('fuenteUTM').textContent = `✅ UTM oficial para ${formatearMes(mesSeleccionado)}`;
+                
                 mostrarAlerta(`✅ UTM obtenida: $${Math.round(utm).toLocaleString('es-CL')}`, 'success');
+                console.log(`✅ UTM obtenida exitosamente: $${utm.toLocaleString('es-CL')}`);
                 
             } catch (error) {
                 console.error('❌ Error obteniendo UTM:', error);
-                mostrarAlerta('❌ Error obteniendo UTM. Ingresa manualmente.', 'danger');
+                
+                // Fallback a valor manual
                 document.getElementById('fuenteUTM').textContent = 'Error - Ingresa valor manualmente';
                 document.getElementById('valorUTM').readOnly = false;
+                document.getElementById('valorUTM').placeholder = '68785';
+                
+                mostrarAlerta('❌ Error obteniendo UTM. Ingresa manualmente.', 'danger');
+                
             } finally {
                 btn.innerHTML = textOriginal;
                 btn.disabled = false;
             }
         }
 
+        // CALCULAR PENSIÓN
         function calcularPension() {
             try {
                 const mesInput = document.getElementById('mesCalculo');
@@ -277,16 +401,30 @@
                     return;
                 }
                 
-                const factorUTM = 3.51360;
+                // Obtener factor personalizado si existe
+                let factorUTM = 3.51360;
+                try {
+                    const factorPersonalizado = localStorage.getItem('pension_factor_utm');
+                    if (factorPersonalizado) {
+                        factorUTM = parseFloat(factorPersonalizado);
+                    }
+                } catch (error) {
+                    console.log('Usando factor por defecto');
+                }
+                
                 const montoCalculado = Math.round(valorUTM * factorUTM);
                 
+                // Actualizar resultados
                 document.getElementById('mesCalculado').textContent = formatearMes(mes).split(' ')[0];
                 document.getElementById('utmUsada').textContent = formatearPesos(valorUTM);
                 document.getElementById('montoCalculado').textContent = formatearPesos(montoCalculado);
-                document.getElementById('detalleCalculo').textContent = `${valorUTM.toLocaleString()} × 3.51360 = ${montoCalculado.toLocaleString()}`;
+                document.getElementById('detalleCalculo').textContent = 
+                    `${valorUTM.toLocaleString('es-CL')} × ${factorUTM} = ${montoCalculado.toLocaleString('es-CL')}`;
                 
                 document.getElementById('resultadoCalculo').style.display = 'block';
                 document.getElementById('resultadoCalculo').scrollIntoView({ behavior: 'smooth' });
+                
+                console.log(`💰 Cálculo completado: $${montoCalculado.toLocaleString('es-CL')}`);
                 
             } catch (error) {
                 console.error('❌ Error en cálculo:', error);
@@ -294,8 +432,13 @@
             }
         }
 
+        // FUNCIONES DE UTILIDAD
         function formatearPesos(cantidad) {
-            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(cantidad);
+            return new Intl.NumberFormat('es-CL', { 
+                style: 'currency', 
+                currency: 'CLP', 
+                minimumFractionDigits: 0 
+            }).format(cantidad);
         }
 
         function formatearMes(mesAno) {
@@ -312,12 +455,34 @@
             const alerta = document.createElement('div');
             alerta.className = `alert alert-${tipo}`;
             alerta.textContent = mensaje;
+            alerta.style.cssText = `
+                padding: 0.75rem 1rem;
+                margin: 1rem 0;
+                border-radius: 12px;
+                background: ${tipo === 'success' ? 'rgba(76, 175, 80, 0.2)' : 
+                              tipo === 'warning' ? 'rgba(255, 193, 7, 0.2)' : 'rgba(244, 67, 54, 0.2)'};
+                color: ${tipo === 'success' ? '#81c784' : 
+                         tipo === 'warning' ? '#ffb74d' : '#e57373'};
+                border: 1px solid ${tipo === 'success' ? 'rgba(76, 175, 80, 0.3)' : 
+                                   tipo === 'warning' ? 'rgba(255, 193, 7, 0.3)' : 'rgba(244, 67, 54, 0.3)'};
+            `;
             
             const container = document.querySelector('.container');
             container.insertBefore(alerta, container.firstChild);
             
-            setTimeout(() => { if (alerta.parentNode) alerta.remove(); }, 4000);
+            setTimeout(() => { 
+                if (alerta.parentNode) alerta.remove(); 
+            }, 4000);
         }
+
+        // DEBUG: Función para verificar el sistema
+        window.debugCalculadora = function() {
+            console.log('🔍 Debug Calculadora:');
+            console.log('- sistemaUTMListo:', sistemaUTMListo);
+            console.log('- window.UTMAPI:', typeof window.UTMAPI);
+            console.log('- window.obtenerUTMPorMes:', typeof window.obtenerUTMPorMes);
+            console.log('- window.obtenerUTMActual:', typeof window.obtenerUTMActual);
+        };
     </script>
 </body>
 </html>
