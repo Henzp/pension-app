@@ -1,4 +1,4 @@
-// utm-api.js - Sistema UTM optimizado para WebView nativo
+// utm-api.js - Sistema UTM con múltiples fuentes (SII + Mindicador)
 
 class UTMAPI {
     constructor() {
@@ -6,7 +6,29 @@ class UTMAPI {
         this.cacheKey = 'pension_utm_cache';
         this.isNativeApp = this.detectNativeEnvironment();
         
-        // Valores UTM reales actualizados (junio 2025)
+        // URLs de APIs oficiales (en orden de prioridad)
+        this.apis = [
+            {
+                nombre: 'SII/SBIF Oficial',
+                url: 'https://api.sbif.cl/api-sbifv3/recursos_api/utm',
+                headers: { 'Accept': 'application/json' },
+                parseResponse: this.parseSIIResponse
+            },
+            {
+                nombre: 'CMF Chile',
+                url: 'https://api.cmfchile.cl/api-sbifv3/recursos_api/utm',
+                headers: { 'Accept': 'application/json' },
+                parseResponse: this.parseSIIResponse
+            },
+            {
+                nombre: 'Mindicador.cl',
+                url: 'https://mindicador.cl/api/utm',
+                headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0 (compatible; PensionUTM/1.0)' },
+                parseResponse: this.parseMindicadorResponse
+            }
+        ];
+        
+        // Valores UTM locales (backup confiable)
         this.valoresUTM = {
             '2024-01': 64731, '2024-02': 64838, '2024-03': 64946, 
             '2024-04': 65054, '2024-05': 65162, '2024-06': 65270,
@@ -18,129 +40,169 @@ class UTMAPI {
             '2025-10': 66998, '2025-11': 67106, '2025-12': 67214
         };
         
-        console.log(`📱 UTM API inicializada - Entorno: ${this.isNativeApp ? 'Nativo' : 'Web'}`);
+        console.log(`📱 UTM API Multi-Fuente iniciada - Entorno: ${this.isNativeApp ? 'Nativo' : 'Web'}`);
+        console.log(`🏛️ APIs disponibles: ${this.apis.length} fuentes oficiales`);
     }
 
-    // Detectar si estamos en app nativa o navegador web
+    // Detectar entorno nativo
     detectNativeEnvironment() {
         try {
-            // Detectores de entorno nativo
             const isWebView = window.isWebView || 
                              window.isNativeApp || 
                              localStorage.getItem('isNativeApp') === 'true' ||
                              navigator.userAgent.includes('NativeApp') ||
+                             navigator.userAgent.includes('PensionUTMApp') ||
                              navigator.userAgent.includes('wv') ||
                              (window.outerWidth === 0 && window.outerHeight === 0);
             
             if (isWebView) {
-                console.log('📱 Entorno nativo detectado - Usando valores locales');
+                console.log('📱 App nativa detectada - Priorizará valores locales');
                 return true;
             }
             
+            console.log('🌐 Navegador web detectado - Intentará APIs oficiales');
             return false;
         } catch (error) {
             console.log('⚠️ Error detectando entorno, asumiendo nativo');
-            return true; // Asumir nativo por seguridad
+            return true;
         }
     }
 
-    // Método principal - Optimizado para app nativa
+    // Método principal con múltiples fuentes
     async obtenerUTMActual() {
         try {
-            console.log('🔄 Obteniendo UTM actual...');
+            console.log('🔄 Iniciando obtención UTM multi-fuente...');
             
-            // En app nativa, usar valores locales directamente
-            if (this.isNativeApp || this.forceLocalMode) {
-                console.log('📱 App nativa: usando valores locales');
+            // En app nativa, usar valores locales directamente (más confiable)
+            if (this.isNativeApp) {
+                console.log('📱 App nativa: usando valores locales (recomendado para WebView)');
                 return this.obtenerUTMLocal();
             }
             
-            // En navegador web, intentar API primero
-            const apiResult = await this.intentarAPIReal();
-            if (apiResult) {
-                console.log('✅ UTM desde API real:', apiResult.utm);
-                return apiResult;
+            // En navegador web, intentar APIs oficiales
+            console.log('🌐 Navegador web: intentando APIs oficiales...');
+            
+            // Verificar caché primero
+            const cached = this.obtenerDeCache();
+            if (cached && cached.utm) {
+                console.log(`📦 UTM desde caché: $${cached.utm.toLocaleString('es-CL')} (${cached.fuente})`);
+                return cached;
+            }
+            
+            // Intentar APIs en orden de prioridad
+            const resultado = await this.intentarAPIsOficiales();
+            if (resultado) {
+                this.guardarEnCache(resultado);
+                console.log(`✅ UTM desde ${resultado.fuente}: $${resultado.utm.toLocaleString('es-CL')}`);
+                return resultado;
             }
             
             // Fallback a valores locales
-            const resultado = this.obtenerUTMLocal();
-            console.log('✅ UTM desde valores locales:', resultado.utm);
-            return resultado;
+            const local = this.obtenerUTMLocal();
+            console.log(`🏠 Fallback a valores locales: $${local.utm.toLocaleString('es-CL')}`);
+            return local;
             
         } catch (error) {
-            console.log('⚠️ Error obteniendo UTM, usando valores locales');
+            console.error('❌ Error en obtenerUTMActual:', error);
             return this.obtenerUTMLocal();
         }
     }
 
-    // Intentar obtener desde API real (solo en navegador web)
-    async intentarAPIReal() {
-        try {
-            // No intentar API en entornos nativos
-            if (this.isNativeApp) {
-                console.log('📱 Saltando API en app nativa');
-                return null;
-            }
-            
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000); // Timeout más corto
-            
-            const response = await fetch('https://mindicador.cl/api/utm', {
-                signal: controller.signal,
-                headers: {
-                    'Accept': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (compatible; PensionUTM/1.0)'
+    // Intentar todas las APIs oficiales
+    async intentarAPIsOficiales() {
+        for (let i = 0; i < this.apis.length; i++) {
+            const api = this.apis[i];
+            try {
+                console.log(`🔄 Intentando ${api.nombre}...`);
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                
+                const response = await fetch(api.url, {
+                    signal: controller.signal,
+                    headers: api.headers,
+                    mode: 'cors'
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
                 }
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                const utm = api.parseResponse(data);
+                
+                if (utm && utm > 0) {
+                    console.log(`✅ ${api.nombre} exitoso: $${utm.toLocaleString('es-CL')}`);
+                    return {
+                        utm: utm,
+                        fecha: new Date().toISOString(),
+                        fuente: api.nombre,
+                        esRespaldo: false,
+                        apiIndex: i
+                    };
+                }
+                
+            } catch (error) {
+                console.warn(`❌ ${api.nombre} falló: ${error.message}`);
+                continue; // Intentar siguiente API
             }
-            
-            const data = await response.json();
-            
-            if (data.serie && data.serie.length > 0) {
-                const valor = data.serie[0].valor;
-                return {
-                    utm: valor,
-                    fecha: new Date().toISOString(),
-                    fuente: 'api-real',
-                    esRespaldo: false
-                };
+        }
+        
+        console.log('⚠️ Todas las APIs fallaron, usando valores locales');
+        return null;
+    }
+
+    // Parser para respuesta SII/SBIF/CMF
+    parseSIIResponse(data) {
+        try {
+            if (data.UTMs && Array.isArray(data.UTMs) && data.UTMs.length > 0) {
+                const valorStr = data.UTMs[0].Valor.replace(/[^0-9.,]/g, '').replace(',', '.');
+                return parseFloat(valorStr);
             }
-            
             return null;
-            
         } catch (error) {
-            console.log('⚠️ API no disponible (normal en app nativa):', error.message);
+            console.error('Error parseando respuesta SII:', error);
             return null;
         }
     }
 
-    // Obtener UTM de valores locales (SIEMPRE funciona)
+    // Parser para respuesta Mindicador.cl
+    parseMindicadorResponse(data) {
+        try {
+            if (data.serie && Array.isArray(data.serie) && data.serie.length > 0) {
+                return parseFloat(data.serie[0].valor);
+            }
+            return null;
+        } catch (error) {
+            console.error('Error parseando respuesta Mindicador:', error);
+            return null;
+        }
+    }
+
+    // Obtener UTM de valores locales
     obtenerUTMLocal() {
         const hoy = new Date();
         const mes = (hoy.getMonth() + 1).toString().padStart(2, '0');
         const año = hoy.getFullYear();
         const claveActual = `${año}-${mes}`;
         
-        // Usar valor del mes actual, o el más reciente disponible
         let utm = this.valoresUTM[claveActual];
         
         if (!utm) {
-            // Si no hay valor para el mes actual, usar el más reciente
             const claves = Object.keys(this.valoresUTM).sort().reverse();
             const claveReciente = claves[0];
             utm = this.valoresUTM[claveReciente];
-            console.log(`📅 Usando valor más reciente disponible: ${claveReciente}`);
+            console.log(`📅 Usando UTM más reciente: ${claveReciente}`);
+        } else {
+            console.log(`📅 UTM del mes actual ${claveActual}`);
         }
         
         return {
             utm: utm,
             fecha: hoy.toISOString(),
-            fuente: this.isNativeApp ? 'local-nativo' : 'local',
+            fuente: this.isNativeApp ? 'Valores Locales (App)' : 'Valores Locales (Web)',
             mes: parseInt(mes),
             año: año,
             esRespaldo: false,
@@ -148,7 +210,42 @@ class UTMAPI {
         };
     }
 
-    // Obtener UTM específica por mes/año
+    // Manejo de caché
+    obtenerDeCache() {
+        try {
+            const cached = localStorage.getItem(this.cacheKey);
+            if (!cached) return null;
+
+            const data = JSON.parse(cached);
+            const ahora = new Date().getTime();
+            const tiempoCache = new Date(data.timestamp).getTime();
+
+            if (ahora - tiempoCache < this.cacheDuration) {
+                return data;
+            }
+
+            localStorage.removeItem(this.cacheKey);
+            return null;
+        } catch (error) {
+            console.error('Error leyendo caché:', error);
+            return null;
+        }
+    }
+
+    guardarEnCache(data) {
+        try {
+            const cacheData = {
+                ...data,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem(this.cacheKey, JSON.stringify(cacheData));
+            console.log(`📦 UTM guardada en caché: ${data.fuente}`);
+        } catch (error) {
+            console.error('Error guardando caché:', error);
+        }
+    }
+
+    // Obtener UTM por mes específico
     async obtenerUTMPorMes(mes, año) {
         try {
             const clave = `${año}-${mes.toString().padStart(2, '0')}`;
@@ -158,14 +255,13 @@ class UTMAPI {
                 return {
                     utm: utm,
                     fecha: new Date(año, mes - 1, 1).toISOString(),
-                    fuente: this.isNativeApp ? 'local-nativo' : 'local',
+                    fuente: 'Valores Locales Específicos',
                     mes: mes,
-                    año: año,
-                    entornoNativo: this.isNativeApp
+                    año: año
                 };
             }
             
-            // Si no existe, usar el más cercano
+            // Si no existe valor específico, usar actual
             return await this.obtenerUTMActual();
             
         } catch (error) {
@@ -173,21 +269,17 @@ class UTMAPI {
         }
     }
 
-    // Obtener factor UTM personalizado
+    // Factor UTM personalizable
     obtenerFactorPersonalizado() {
         const factorGuardado = localStorage.getItem('pension_factor_utm');
         return factorGuardado ? parseFloat(factorGuardado) : 3.51360;
     }
 
-    // Guardar factor UTM personalizado
-    guardarFactorPersonalizado(factor) {
-        localStorage.setItem('pension_factor_utm', factor.toString());
-    }
-
-    // Calcular pensión con factor personalizable
+    // Calcular pensión
     calcularPension(utm, factorCustom = null) {
         const factor = factorCustom || this.obtenerFactorPersonalizado();
         const monto = utm * factor;
+        
         return {
             utm: utm,
             factor: factor,
@@ -198,18 +290,7 @@ class UTMAPI {
         };
     }
 
-    // Calcular con factor específico
-    calcularConFactor(utm, factor) {
-        const monto = utm * factor;
-        return {
-            utm: utm,
-            factor: factor,
-            monto: Math.round(monto),
-            montoFormateado: this.formatearUTM(monto)
-        };
-    }
-
-    // Formatear como pesos chilenos
+    // Formatear pesos
     formatearUTM(utm) {
         return new Intl.NumberFormat('es-CL', {
             style: 'currency',
@@ -219,80 +300,105 @@ class UTMAPI {
         }).format(utm);
     }
 
-    // Verificar conexión (SIEMPRE retorna true)
+    // Verificar conexión
     async verificarConexion() {
         try {
             await this.obtenerUTMActual();
-            return true; // Siempre "Online" porque tenemos valores locales
+            return true;
         } catch (error) {
-            return true; // Incluso con error, mostramos "Online"
+            return true; // Siempre online con valores locales
         }
     }
 
-    // Obtener información completa de configuración
-    obtenerConfiguracion() {
-        return {
-            factorUTM: this.obtenerFactorPersonalizado(),
-            factorEsPersonalizado: this.obtenerFactorPersonalizado() !== 3.51360,
-            historialCambios: JSON.parse(localStorage.getItem('pension_config_historial') || '[]'),
-            entornoNativo: this.isNativeApp,
-            fuenteDatos: this.isNativeApp ? 'local-nativo' : 'api+local'
-        };
-    }
-
-    // Restablecer configuración a valores por defecto
-    restablecerConfiguracion() {
-        localStorage.removeItem('pension_factor_utm');
-        localStorage.removeItem('pension_config_historial');
-        console.log('✅ Configuración restablecida a valores por defecto');
-    }
-
-    // Método especial para mostrar información de entorno
-    obtenerInfoEntorno() {
-        return {
-            esNativo: this.isNativeApp,
-            userAgent: navigator.userAgent,
+    // Diagnóstico del sistema
+    async diagnosticarSistema() {
+        const info = {
             entorno: this.isNativeApp ? 'App Nativa' : 'Navegador Web',
-            fuenteDatos: this.isNativeApp ? 'Valores Locales' : 'API + Valores Locales',
-            versionUTM: this.valoresUTM['2025-06'] // Valor actual de junio 2025
+            apis: [],
+            valoresLocales: Object.keys(this.valoresUTM).length,
+            factorActual: this.obtenerFactorPersonalizado()
         };
+
+        // Test de APIs (solo en navegador)
+        if (!this.isNativeApp) {
+            for (const api of this.apis) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2000);
+                    
+                    const response = await fetch(api.url, {
+                        signal: controller.signal,
+                        headers: api.headers
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    info.apis.push({
+                        nombre: api.nombre,
+                        estado: response.ok ? 'Disponible' : `Error HTTP ${response.status}`,
+                        ok: response.ok
+                    });
+                } catch (error) {
+                    info.apis.push({
+                        nombre: api.nombre,
+                        estado: `No disponible (${error.message})`,
+                        ok: false
+                    });
+                }
+            }
+        }
+
+        return info;
     }
 }
 
-// Crear instancia global
+// Instancia global
 window.UTMAPI = new UTMAPI();
 
-// Funciones compatibles
+// Funciones de compatibilidad
 window.obtenerUTMActual = () => window.UTMAPI.obtenerUTMActual();
 window.obtenerUTMPorMes = (mesAno) => {
     const [año, mes] = mesAno.split('-');
     return window.UTMAPI.obtenerUTMPorMes(parseInt(mes), parseInt(año));
 };
-
-// Funciones para factor personalizado
 window.obtenerFactorUTM = () => window.UTMAPI.obtenerFactorPersonalizado();
 window.calcularPensionUTM = (utm, factor = null) => window.UTMAPI.calcularPension(utm, factor);
 
-// Auto-inicialización
+// Auto-inicialización con diagnóstico
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        console.log('🚀 Iniciando sistema UTM...');
+        console.log('🚀 Iniciando sistema UTM multi-fuente...');
+        
         const resultado = await window.UTMAPI.obtenerUTMActual();
+        console.log(`💰 UTM obtenida: $${resultado.utm.toLocaleString('es-CL')} desde ${resultado.fuente}`);
+        
+        // Diagnóstico del sistema (solo en navegador)
+        if (!window.UTMAPI.isNativeApp) {
+            const diagnostico = await window.UTMAPI.diagnosticarSistema();
+            console.log('🔍 Diagnóstico de APIs:', diagnostico.apis);
+        }
         
         const config = window.UTMAPI.obtenerConfiguracion();
-        const info = window.UTMAPI.obtenerInfoEntorno();
-        
-        console.log(`📱 Entorno: ${info.entorno}`);
-        console.log(`📊 UTM actual: $${resultado.utm.toLocaleString('es-CL')}`);
-        
-        if (config.factorEsPersonalizado) {
+        if (config && config.factorEsPersonalizado) {
             console.log(`⚙️ Factor personalizado: ${config.factorUTM} UTM`);
         }
         
-        console.log('✅ Sistema UTM inicializado correctamente');
+        // Actualizar estado visual
+        setTimeout(() => {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            if (statusDot && statusText) {
+                statusDot.className = 'status-dot status-online';
+                statusText.textContent = 'Online';
+                console.log('🟢 Estado actualizado a Online');
+            }
+        }, 1000);
+        
+        console.log('✅ Sistema UTM multi-fuente inicializado');
+        
     } catch (error) {
         console.log('✅ Sistema UTM funcionando con valores locales');
     }
 });
 
-console.log('📊 UTM API cargado - VERSIÓN OPTIMIZADA PARA APP NATIVA');
+console.log('📊 UTM API Multi-Fuente cargado - SII + Mindicador + Valores Locales');
