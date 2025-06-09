@@ -179,14 +179,14 @@
         }
     </style>
 
-    <!-- JavaScript - ORDEN CORREGIDO -->
-    <script src="/js/app.js"></script>
+    <!-- ✅ SCRIPTS EN ORDEN CORRECTO - ESTE ERA EL PROBLEMA -->
     <script src="/js/utm-api.js"></script>
+    <script src="/js/app.js"></script>
     <script>
         // VARIABLES GLOBALES
         let sistemaUTMListo = false;
 
-        // FUNCIÓN DE INICIALIZACIÓN PRINCIPAL
+        // ✅ FUNCIÓN DE INICIALIZACIÓN PRINCIPAL
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🧮 Inicializando calculadora...');
             
@@ -233,12 +233,12 @@
             cargarFactorPersonalizado();
         }
 
-        // ESPERAR A QUE EL SISTEMA UTM ESTÉ DISPONIBLE
+        // ✅ ESPERAR A QUE EL SISTEMA UTM ESTÉ DISPONIBLE
         async function esperarSistemaUTM() {
             console.log('⏳ Esperando que el sistema UTM esté disponible...');
             
             let intentos = 0;
-            const maxIntentos = 30; // 3 segundos máximo
+            const maxIntentos = 50; // 5 segundos máximo
             
             while (intentos < maxIntentos) {
                 if (typeof window.obtenerUTMPorMes === 'function' && 
@@ -295,7 +295,7 @@
             }
         }
 
-        // VERIFICAR ESTADO DE CONEXIÓN
+        // ✅ VERIFICAR ESTADO DE CONEXIÓN
         async function verificarEstadoConexion() {
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
@@ -324,19 +324,13 @@
             }
         }
 
-        // OBTENER UTM DEL MES - FUNCIÓN PRINCIPAL CORREGIDA
+        // ✅ OBTENER UTM DEL MES - FUNCIÓN CORREGIDA
         async function obtenerUTMDelMes() {
             const btn = document.getElementById('btnObtenerUTM');
             const textOriginal = btn.innerHTML;
             
             try {
                 console.log('🔄 Iniciando obtención de UTM...');
-                
-                // Validar que el sistema esté listo
-                if (!sistemaUTMListo) {
-                    console.log('⏳ Sistema UTM no está listo, esperando...');
-                    await esperarSistemaUTM();
-                }
                 
                 // UI feedback
                 btn.innerHTML = '🔄';
@@ -350,15 +344,27 @@
                 
                 console.log(`📅 Obteniendo UTM para: ${mesSeleccionado}`);
                 
-                // LLAMADA CORREGIDA - Usar función global en lugar de UTMAPI directamente
-                let utm;
+                // ✅ ESPERAR A QUE EL SISTEMA ESTÉ DISPONIBLE
+                let intentos = 0;
+                const maxIntentos = 50; // 5 segundos máximo
                 
-                if (typeof window.obtenerUTMPorMes === 'function') {
-                    console.log('✅ Usando función global obtenerUTMPorMes');
-                    utm = await window.obtenerUTMPorMes(mesSeleccionado);
-                } else {
-                    throw new Error('Función obtenerUTMPorMes no disponible');
+                while (intentos < maxIntentos) {
+                    if (typeof window.obtenerUTMPorMes === 'function') {
+                        break; // Sistema listo
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 100)); // Esperar 100ms
+                    intentos++;
                 }
+                
+                // Verificar que el sistema esté disponible
+                if (typeof window.obtenerUTMPorMes !== 'function') {
+                    throw new Error('Sistema UTM no disponible. Recarga la página.');
+                }
+                
+                console.log('✅ Sistema UTM disponible, obteniendo valor...');
+                
+                // ✅ LLAMADA CORRECTA - NUNCA MÁS UTMAPI.obtenerUTMPorMes
+                const utm = await window.obtenerUTMPorMes(mesSeleccionado);
                 
                 // Validar resultado
                 if (!utm || isNaN(utm) || utm <= 0) {
@@ -366,23 +372,26 @@
                 }
                 
                 // Actualizar UI
-                document.getElementById('valorUTM').value = Math.round(utm);
+                const utmRedondeada = Math.round(utm);
+                document.getElementById('valorUTM').value = utmRedondeada;
                 document.getElementById('fuenteUTM').textContent = `✅ UTM oficial para ${formatearMes(mesSeleccionado)}`;
                 
-                mostrarAlerta(`✅ UTM obtenida: $${Math.round(utm).toLocaleString('es-CL')}`, 'success');
+                mostrarAlerta(`✅ UTM obtenida: $${utmRedondeada.toLocaleString('es-CL')}`, 'success');
                 console.log(`✅ UTM obtenida exitosamente: $${utm.toLocaleString('es-CL')}`);
                 
             } catch (error) {
                 console.error('❌ Error obteniendo UTM:', error);
                 
                 // Fallback a valor manual
-                document.getElementById('fuenteUTM').textContent = 'Error - Ingresa valor manualmente';
+                document.getElementById('fuenteUTM').textContent = '❌ Error - Ingresa valor manualmente';
                 document.getElementById('valorUTM').readOnly = false;
                 document.getElementById('valorUTM').placeholder = '68785';
+                document.getElementById('valorUTM').focus();
                 
-                mostrarAlerta('❌ Error obteniendo UTM. Ingresa manualmente.', 'danger');
+                mostrarAlerta(`❌ Error: ${error.message}`, 'danger');
                 
             } finally {
+                // Restaurar botón
                 btn.innerHTML = textOriginal;
                 btn.disabled = false;
             }
@@ -475,14 +484,32 @@
             }, 4000);
         }
 
-        // DEBUG: Función para verificar el sistema
+        // ✅ DEBUG: Función para verificar el sistema
         window.debugCalculadora = function() {
             console.log('🔍 Debug Calculadora:');
             console.log('- sistemaUTMListo:', sistemaUTMListo);
             console.log('- window.UTMAPI:', typeof window.UTMAPI);
             console.log('- window.obtenerUTMPorMes:', typeof window.obtenerUTMPorMes);
             console.log('- window.obtenerUTMActual:', typeof window.obtenerUTMActual);
+            
+            // Test de función
+            if (typeof window.obtenerUTMPorMes === 'function') {
+                console.log('✅ Sistema funcionando, probando...');
+                window.obtenerUTMPorMes('2025-06').then(utm => {
+                    console.log('✅ Test exitoso, UTM:', utm);
+                }).catch(error => {
+                    console.error('❌ Test falló:', error);
+                });
+            } else {
+                console.error('❌ window.obtenerUTMPorMes no está disponible');
+            }
         };
+
+        // ✅ AUTO-DEBUG después de 3 segundos
+        setTimeout(() => {
+            console.log('🔍 Auto-debug ejecutándose...');
+            window.debugCalculadora();
+        }, 3000);
     </script>
 </body>
 </html>
