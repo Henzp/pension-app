@@ -1,11 +1,11 @@
-// utm-api.js - SISTEMA UTM CONECTADO 24/7
+// utm-api.js - OPTIMIZADO PARA ANDROID WEBVIEW
 
 class UTMAPI {
     constructor() {
-        this.cacheDuration = 2 * 60 * 60 * 1000; // 2 horas (más frecuente)
+        this.cacheDuration = 4 * 60 * 60 * 1000; // 4 horas (más tiempo para apps nativas)
         this.cacheKey = 'pension_utm_cache';
         
-        // 🎯 VALORES UTM REALES 2025 como fallback
+        // 🎯 VALORES UTM REALES 2025 EXTENDIDOS (fallback principal para Android)
         this.valoresUTMReales = {
             '2024-01': 64731, '2024-02': 64838, '2024-03': 64946, 
             '2024-04': 65054, '2024-05': 65162, '2024-06': 65270,
@@ -14,29 +14,77 @@ class UTMAPI {
             '2025-01': 67429, '2025-02': 67294, '2025-03': 68034,
             '2025-04': 68306, '2025-05': 68648, '2025-06': 68785,
             '2025-07': 69000, '2025-08': 69200, '2025-09': 69400,
-            '2025-10': 69600, '2025-11': 69800, '2025-12': 70000
+            '2025-10': 69600, '2025-11': 69800, '2025-12': 70000,
+            // Valores estimados para 2026 (en caso de que la app se use más tiempo)
+            '2026-01': 70200, '2026-02': 70400, '2026-03': 70600,
+            '2026-04': 70800, '2026-05': 71000, '2026-06': 71200
         };
         
-        console.log('🌐 UTM API CONECTADA 24/7 iniciada');
-        console.log('📡 Intentará APIs tanto en navegador como en WebView');
+        // 🔍 DETECTAR ENTORNO
+        this.esAndroid = this.detectarAndroid();
+        this.esWebView = this.detectarWebView();
+        
+        console.log('🌐 UTM API iniciada');
+        console.log('📱 Entorno Android:', this.esAndroid);
+        console.log('🖥️ Entorno WebView:', this.esWebView);
+        
+        // En Android, priorizar valores locales
+        if (this.esAndroid || this.esWebView) {
+            console.log('📱 Modo Android detectado - Priorizando valores locales');
+        }
     }
 
-    // 🌐 MÉTODO PRINCIPAL - SIEMPRE INTENTA CONECTAR
+    // 🔍 DETECTAR SI ESTAMOS EN ANDROID
+    detectarAndroid() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        return userAgent.includes('android') || 
+               userAgent.includes('mobile') ||
+               typeof window.cordova !== 'undefined' ||
+               typeof window.Capacitor !== 'undefined';
+    }
+
+    // 🔍 DETECTAR SI ESTAMOS EN WEBVIEW
+    detectarWebView() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        return userAgent.includes('wv') || 
+               !userAgent.includes('chrome') || 
+               typeof window.cordova !== 'undefined' ||
+               typeof window.Capacitor !== 'undefined';
+    }
+
+    // 🌐 MÉTODO PRINCIPAL OPTIMIZADO PARA ANDROID
     async obtenerUTMActual() {
         try {
-            console.log('🔄 Obteniendo UTM (modo conectado)...');
+            console.log('🔄 Obteniendo UTM...');
             
-            // Verificar caché válido primero
+            // En Android, verificar caché primero y ser más permisivo
             const cached = this.obtenerDeCache();
-            if (cached && this.esCacheValido(cached)) {
-                console.log(`📦 UTM desde caché (válido): $${cached.utm.toLocaleString('es-CL')}`);
-                // Actualizar en background sin esperar
-                this.actualizarEnBackground();
+            if (cached && this.esCacheValido(cached, this.esAndroid)) {
+                console.log(`📦 UTM desde caché: $${cached.utm.toLocaleString('es-CL')}`);
+                
+                // Solo intentar actualizar en background si NO es Android
+                if (!this.esAndroid && !this.esWebView) {
+                    this.actualizarEnBackground();
+                }
                 return cached;
             }
             
-            // Intentar obtener desde APIs
-            console.log('🌐 Intentando APIs...');
+            // Si es Android/WebView, intentar APIs con timeout más corto
+            if (this.esAndroid || this.esWebView) {
+                console.log('📱 Entorno Android: Intentando APIs con timeout corto...');
+                const resultadoAPI = await this.intentarAPIsAndroid();
+                if (resultadoAPI) {
+                    this.guardarEnCache(resultadoAPI);
+                    console.log(`✅ UTM desde API: $${resultadoAPI.utm.toLocaleString('es-CL')}`);
+                    return resultadoAPI;
+                }
+                
+                console.log('📱 APIs no disponibles en Android, usando valores locales');
+                return this.obtenerUTMLocal();
+            }
+            
+            // Para navegadores normales, intentar APIs completas
+            console.log('🌐 Navegador normal: Intentando APIs completas...');
             const resultadoAPI = await this.intentarAPIsConectadas();
             if (resultadoAPI) {
                 this.guardarEnCache(resultadoAPI);
@@ -44,8 +92,8 @@ class UTMAPI {
                 return resultadoAPI;
             }
             
-            // Fallback a valores locales
-            console.log('🏠 Usando valores locales como fallback');
+            // Fallback final
+            console.log('🏠 Fallback: Usando valores locales');
             return this.obtenerUTMLocal();
             
         } catch (error) {
@@ -54,7 +102,65 @@ class UTMAPI {
         }
     }
 
-    // 🚀 INTENTAR APIS CON CONFIGURACIÓN WEBVIEW-FRIENDLY
+    // 🚀 INTENTAR APIS OPTIMIZADAS PARA ANDROID
+    async intentarAPIsAndroid() {
+        // En Android, usar timeouts más cortos y menos intentos
+        const apis = [
+            {
+                nombre: 'Mindicador Simple',
+                url: 'https://mindicador.cl/api/utm',
+                timeout: 3000 // Timeout más corto para Android
+            }
+        ];
+
+        for (let api of apis) {
+            try {
+                console.log(`🔄 [Android] Intentando ${api.nombre}...`);
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), api.timeout);
+                
+                // Configuración mínima para Android WebView
+                const fetchOptions = {
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                    // NO usar mode: 'cors' en Android WebView
+                };
+                
+                const response = await fetch(api.url, fetchOptions);
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const utm = this.parseMindicadorResponse(data);
+                
+                if (utm && utm > 65000 && utm < 75000) {
+                    console.log(`✅ [Android] ${api.nombre} exitoso: $${utm.toLocaleString('es-CL')}`);
+                    return {
+                        utm: utm,
+                        fecha: new Date().toISOString(),
+                        fuente: `${api.nombre} (Android)`,
+                        esRespaldo: false,
+                        timestamp: new Date().toISOString()
+                    };
+                }
+                
+            } catch (error) {
+                console.warn(`❌ [Android] ${api.nombre} falló: ${error.message}`);
+                continue;
+            }
+        }
+        
+        console.log('⚠️ [Android] Todas las APIs fallaron');
+        return null;
+    }
+
+    // 🚀 INTENTAR APIS COMPLETAS (NAVEGADORES)
     async intentarAPIsConectadas() {
         const apis = [
             {
@@ -63,7 +169,7 @@ class UTMAPI {
                 timeout: 5000
             },
             {
-                nombre: 'Mindicador CORS Proxy',
+                nombre: 'Proxy CORS',
                 url: 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://mindicador.cl/api/utm'),
                 timeout: 6000,
                 esProxy: true
@@ -72,48 +178,36 @@ class UTMAPI {
 
         for (let api of apis) {
             try {
-                console.log(`🔄 Intentando ${api.nombre}...`);
+                console.log(`🔄 [Web] Intentando ${api.nombre}...`);
                 
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), api.timeout);
                 
-                const headers = {
-                    'Accept': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; Mobile; rv:91.0) Gecko/91.0 Firefox/91.0'
-                };
-                
-                // Para WebView, intentar sin mode: 'cors'
-                const fetchOptions = {
+                const response = await fetch(api.url, {
                     signal: controller.signal,
-                    headers: headers
-                };
-                
-                // Solo agregar mode en navegadores normales
-                if (typeof window !== 'undefined' && window.chrome) {
-                    fetchOptions.mode = 'cors';
-                }
-                
-                const response = await fetch(api.url, fetchOptions);
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
                 clearTimeout(timeoutId);
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(`HTTP ${response.status}`);
                 }
                 
                 const data = await response.json();
                 let utm;
                 
                 if (api.esProxy) {
-                    // Parsear respuesta de proxy
                     const contenido = JSON.parse(data.contents);
                     utm = this.parseMindicadorResponse(contenido);
                 } else {
-                    // Parsear respuesta directa
                     utm = this.parseMindicadorResponse(data);
                 }
                 
                 if (utm && utm > 65000 && utm < 75000) {
-                    console.log(`✅ ${api.nombre} exitoso: $${utm.toLocaleString('es-CL')}`);
+                    console.log(`✅ [Web] ${api.nombre} exitoso: $${utm.toLocaleString('es-CL')}`);
                     return {
                         utm: utm,
                         fecha: new Date().toISOString(),
@@ -124,12 +218,11 @@ class UTMAPI {
                 }
                 
             } catch (error) {
-                console.warn(`❌ ${api.nombre} falló: ${error.message}`);
+                console.warn(`❌ [Web] ${api.nombre} falló: ${error.message}`);
                 continue;
             }
         }
         
-        console.log('⚠️ Todas las APIs fallaron');
         return null;
     }
 
@@ -142,24 +235,21 @@ class UTMAPI {
                     return valor;
                 }
             }
-            throw new Error('Estructura de respuesta inválida');
+            throw new Error('Estructura inválida');
         } catch (error) {
-            console.error('❌ Error parseando Mindicador:', error);
+            console.error('❌ Error parseando respuesta:', error);
             return null;
         }
     }
 
-    // 🎯 FUNCIÓN CORREGIDA - Compatible con tu calculadora
+    // 🎯 FUNCIÓN PRINCIPAL PARA CALCULADORA
     async obtenerUTMPorMes(mesAno) {
         try {
-            console.log(`🔍 Solicitando UTM para: ${mesAno}`);
+            console.log(`🔍 [${this.esAndroid ? 'Android' : 'Web'}] UTM para: ${mesAno}`);
             
-            // Parsear el string "2025-06" a mes y año
             const [año, mes] = mesAno.split('-');
             const añoNum = parseInt(año);
             const mesNum = parseInt(mes);
-            
-            console.log(`📅 Parseado: mes=${mesNum}, año=${añoNum}`);
             
             // Verificar si es el mes actual
             const hoy = new Date();
@@ -167,18 +257,18 @@ class UTMAPI {
             const añoActual = hoy.getFullYear();
             
             if (mesNum === mesActual && añoNum === añoActual) {
-                console.log('📅 Es el mes actual, obteniendo UTM en tiempo real');
+                console.log('📅 Es el mes actual');
                 const resultado = await this.obtenerUTMActual();
-                return resultado.utm; // Retornar solo el valor numérico
+                return resultado.utm;
             }
             
-            // Para meses específicos, usar valores locales
+            // Para meses específicos, usar valores locales (más confiable en Android)
             const clave = `${añoNum}-${mesNum.toString().padStart(2, '0')}`;
             const utm = this.valoresUTMReales[clave];
             
             if (utm) {
-                console.log(`✅ UTM específica para ${clave}: $${utm.toLocaleString('es-CL')}`);
-                return utm; // Retornar solo el valor numérico
+                console.log(`✅ UTM local para ${clave}: $${utm.toLocaleString('es-CL')}`);
+                return utm;
             } else {
                 console.log(`⚠️ No hay valor para ${clave}, usando actual`);
                 const resultado = await this.obtenerUTMActual();
@@ -187,12 +277,12 @@ class UTMAPI {
             
         } catch (error) {
             console.error(`❌ Error en obtenerUTMPorMes(${mesAno}):`, error);
-            // Fallback de emergencia
+            // Fallback robusto para Android
             return this.valoresUTMReales['2025-06'] || 68785;
         }
     }
 
-    // Obtener UTM local como fallback
+    // Obtener UTM local (fallback principal para Android)
     obtenerUTMLocal() {
         const hoy = new Date();
         const mes = (hoy.getMonth() + 1).toString().padStart(2, '0');
@@ -202,6 +292,7 @@ class UTMAPI {
         let utm = this.valoresUTMReales[claveActual];
         
         if (!utm) {
+            // Usar el valor más reciente disponible
             const claves = Object.keys(this.valoresUTMReales).sort().reverse();
             utm = this.valoresUTMReales[claves[0]];
             console.log(`📅 Usando valor más reciente: ${claves[0]}`);
@@ -210,40 +301,47 @@ class UTMAPI {
         return {
             utm: utm,
             fecha: hoy.toISOString(),
-            fuente: 'Valores Locales (Fallback)',
+            fuente: this.esAndroid ? 'Valores Locales (Android)' : 'Valores Locales',
             esRespaldo: true,
             timestamp: hoy.toISOString()
         };
     }
 
-    // Actualizar en background
+    // Actualizar en background (solo para navegadores)
     async actualizarEnBackground() {
+        if (this.esAndroid || this.esWebView) {
+            return; // No hacer actualizaciones en background en Android
+        }
+        
         try {
-            console.log('🔄 Actualizando UTM en background...');
+            console.log('🔄 Actualizando en background...');
             const resultado = await this.intentarAPIsConectadas();
             if (resultado) {
                 this.guardarEnCache(resultado);
-                console.log('✅ Caché actualizado en background');
+                console.log('✅ Background actualizado');
             }
         } catch (error) {
-            console.log('⚠️ Actualización background falló');
+            console.log('⚠️ Background falló');
         }
     }
 
-    // Verificar validez del caché
-    esCacheValido(cached) {
+    // Validez de caché (más permisivo en Android)
+    esCacheValido(cached, esAndroid = false) {
         try {
             const ahora = new Date().getTime();
             const tiempoCache = new Date(cached.timestamp).getTime();
-            const esValido = ahora - tiempoCache < this.cacheDuration;
+            
+            // En Android, caché válido por más tiempo
+            const duracionCache = esAndroid ? (8 * 60 * 60 * 1000) : this.cacheDuration; // 8 horas en Android
+            const esValido = ahora - tiempoCache < duracionCache;
             
             if (!esValido) {
-                console.log('⏰ Caché expirado (2 horas)');
+                console.log(`⏰ Caché expirado (${esAndroid ? '8' : '4'} horas)`);
                 return false;
             }
             
             if (cached.utm < 65000 || cached.utm > 75000) {
-                console.log('⚠️ Valor de caché fuera de rango');
+                console.log('⚠️ Valor fuera de rango');
                 return false;
             }
             
@@ -289,18 +387,22 @@ class UTMAPI {
         }
     }
 
-    // Calcular pensión
-    calcularPension(utm, factorCustom = null) {
-        const factor = factorCustom || this.obtenerFactorPersonalizado();
-        const monto = utm * factor;
+    // Diagnóstico específico para Android
+    async diagnostico() {
+        console.log('🔍 Diagnóstico completo...');
         
-        return {
-            utm: utm,
-            factor: factor,
-            monto: Math.round(monto),
-            montoFormateado: this.formatearUTM(monto),
-            esFactorPersonalizado: factor !== 3.51360
+        const info = {
+            entorno: this.esAndroid ? 'Android/WebView' : 'Navegador',
+            esAndroid: this.esAndroid,
+            esWebView: this.esWebView,
+            userAgent: navigator.userAgent,
+            cacheDisponible: !!this.obtenerDeCache(),
+            valorActual: await this.obtenerUTMActual(),
+            funcionTest: await this.obtenerUTMPorMes('2025-06')
         };
+        
+        console.table(info);
+        return info;
     }
 
     // Formatear moneda
@@ -311,33 +413,6 @@ class UTMAPI {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         }).format(utm);
-    }
-
-    // Verificar conexión
-    async verificarConexion() {
-        try {
-            const resultado = await this.intentarAPIsConectadas();
-            return resultado !== null;
-        } catch (error) {
-            return false;
-        }
-    }
-
-    // Diagnóstico
-    async diagnostico() {
-        console.log('🔍 Ejecutando diagnóstico completo...');
-        
-        const info = {
-            sistemaConectado: true,
-            cacheDisponible: !!this.obtenerDeCache(),
-            valorActual: await this.obtenerUTMActual(),
-            funcionTest: await this.obtenerUTMPorMes('2025-06'),
-            apis: 'Mindicador.cl + Proxy',
-            factorPersonalizado: this.obtenerFactorPersonalizado()
-        };
-        
-        console.table(info);
-        return info;
     }
 
     // Limpiar caché
@@ -356,40 +431,36 @@ class UTMAPI {
 // 🌐 CREAR INSTANCIA GLOBAL
 window.UTMAPI = new UTMAPI();
 
-// 🎯 FUNCIONES DE COMPATIBILIDAD EXACTAS PARA TU CALCULADORA
+// 🎯 FUNCIONES GLOBALES DE COMPATIBILIDAD
 window.obtenerUTMActual = async () => {
     try {
         const resultado = await window.UTMAPI.obtenerUTMActual();
-        return resultado.utm; // Tu calculadora espera solo el número
+        return resultado.utm;
     } catch (error) {
         console.error('Error en obtenerUTMActual:', error);
-        return 68785; // Fallback de emergencia
+        return 68785;
     }
 };
 
-// 🎯 FUNCIÓN CORREGIDA - Exactamente como la llama tu calculadora
 window.obtenerUTMPorMes = async (mesAno) => {
     try {
-        console.log(`📞 Llamada a obtenerUTMPorMes("${mesAno}")`);
+        console.log(`📞 [Global] obtenerUTMPorMes("${mesAno}")`);
         return await window.UTMAPI.obtenerUTMPorMes(mesAno);
     } catch (error) {
         console.error(`Error en obtenerUTMPorMes(${mesAno}):`, error);
-        return 68785; // Fallback de emergencia
+        return 68785;
     }
 };
 
 window.obtenerFactorUTM = () => window.UTMAPI.obtenerFactorPersonalizado();
-window.calcularPensionUTM = (utm, factor = null) => window.UTMAPI.calcularPension(utm, factor);
-
-// Funciones de utilidad
 window.diagnosticoUTM = () => window.UTMAPI.diagnostico();
 window.limpiarCacheUTM = () => window.UTMAPI.limpiarCache();
-window.forzarActualizacionUTM = () => window.UTMAPI.forzarActualizacion();
 
-// 🚀 AUTO-INICIALIZACIÓN
+// 🚀 AUTO-INICIALIZACIÓN OPTIMIZADA
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        console.log('🚀 Iniciando sistema UTM CONECTADO 24/7...');
+        console.log('🚀 Iniciando sistema UTM...');
+        console.log(`📱 Entorno detectado: ${window.UTMAPI.esAndroid ? 'Android' : 'Web'}`);
         
         const inicio = performance.now();
         const resultado = await window.UTMAPI.obtenerUTMActual();
@@ -397,27 +468,31 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         console.log(`💰 UTM obtenida en ${tiempo}ms: $${resultado.utm.toLocaleString('es-CL')} (${resultado.fuente})`);
         
-        // Test de la función específica
+        // Test de función
         const testMes = await window.UTMAPI.obtenerUTMPorMes('2025-06');
-        console.log(`🧪 Test obtenerUTMPorMes('2025-06'): $${testMes.toLocaleString('es-CL')}`);
+        console.log(`🧪 Test: $${testMes.toLocaleString('es-CL')}`);
         
         // Actualizar estado visual
         setTimeout(() => {
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
             if (statusDot && statusText) {
-                statusDot.className = 'status-dot status-online';
-                statusText.textContent = 'Online';
-                console.log('🟢 Estado: Online');
+                if (resultado.esRespaldo) {
+                    statusDot.className = 'status-dot status-offline';
+                    statusText.textContent = window.UTMAPI.esAndroid ? 'Local (Android)' : 'Offline';
+                } else {
+                    statusDot.className = 'status-dot status-online';
+                    statusText.textContent = 'Online';
+                }
             }
         }, 100);
         
-        console.log('✅ Sistema UTM CONECTADO funcionando correctamente');
+        console.log('✅ Sistema UTM listo');
         
     } catch (error) {
         console.error('❌ Error inicializando:', error);
-        console.log('✅ Funcionando con valores de respaldo');
+        console.log('✅ Funcionando con valores locales');
     }
 });
 
-console.log('🌐 UTM API CONECTADA 24/7 v5.0 - APIs + WebView compatible');
+console.log('🌐 UTM API v6.0 - Android WebView Optimized');
